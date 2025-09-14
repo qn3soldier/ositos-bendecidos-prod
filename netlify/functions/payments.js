@@ -4,7 +4,7 @@ const stripe = require('stripe');
 // Initialize services
 const supabaseUrl = process.env.VITE_SUPABASE_URL;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-const stripeSecretKey = process.env.STRIPE_SECRET_KEY || 'sk_test_dummy_key_for_development';
+const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
 
 // Initialize Stripe
 const stripeClient = stripe(stripeSecretKey);
