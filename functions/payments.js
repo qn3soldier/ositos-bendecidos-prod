@@ -337,7 +337,7 @@ exports.handler = async (event, context) => {
         headers,
         body: JSON.stringify({
           success: true,
-          publishableKey: process.env.VITE_STRIPE_PUBLISHABLE_KEY || 'pk_test_dummy_key',
+          publishableKey: process.env.VITE_STRIPE_PUBLISHABLE_KEY || '',
           paypalClientId: process.env.VITE_PAYPAL_CLIENT_ID || ''
         })
       };
