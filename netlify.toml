@@ -1,0 +1,198 @@
+# Netlify Configuration for Ositos Bendecidos
+# Professional E-commerce & Community Platform
+
+[build]
+  command = "npm run build"
+  publish = "dist"
+  functions = "functions"
+
+[build.environment]
+  NODE_VERSION = "18"
+
+[functions]
+  node_bundler = "esbuild"
+  external_node_modules = ["stripe", "bcryptjs", "jsonwebtoken"]
+
+# ========================================
+# API ROUTES - AUTHENTICATION
+# ========================================
+[[redirects]]
+  from = "/api/auth/*"
+  to = "/.netlify/functions/auth/:splat"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/api/auth"
+  to = "/.netlify/functions/auth"
+  status = 200
+  force = true
+
+# ========================================
+# API ROUTES - PRODUCTS
+# ========================================
+[[redirects]]
+  from = "/api/products/meta/categories"
+  to = "/.netlify/functions/products/meta/categories"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/api/products/*"
+  to = "/.netlify/functions/products/:splat"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/api/products"
+  to = "/.netlify/functions/products"
+  status = 200
+  force = true
+
+# ========================================
+# API ROUTES - ORDERS
+# ========================================
+[[redirects]]
+  from = "/api/orders/*"
+  to = "/.netlify/functions/orders/:splat"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/api/orders"
+  to = "/.netlify/functions/orders"
+  status = 200
+  force = true
+
+# ========================================
+# API ROUTES - PAYMENTS
+# ========================================
+[[redirects]]
+  from = "/api/payments/*"
+  to = "/.netlify/functions/payments/:splat"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/api/payments"
+  to = "/.netlify/functions/payments"
+  status = 200
+  force = true
+
+# ========================================
+# API ROUTES - PRAYERS
+# ========================================
+[[redirects]]
+  from = "/api/prayers/*"
+  to = "/.netlify/functions/prayers/:splat"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/api/prayers"
+  to = "/.netlify/functions/prayers"
+  status = 200
+  force = true
+
+# ========================================
+# API ROUTES - COMMUNITY
+# ========================================
+[[redirects]]
+  from = "/api/community/requests"
+  to = "/.netlify/functions/community/requests"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/api/community/*"
+  to = "/.netlify/functions/community/:splat"
+  status = 200
+  force = true
+
+# ========================================
+# API ROUTES - TESTIMONIALS
+# ========================================
+[[redirects]]
+  from = "/api/testimonials/*"
+  to = "/.netlify/functions/testimonials/:splat"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/api/testimonials"
+  to = "/.netlify/functions/testimonials"
+  status = 200
+  force = true
+
+# ========================================
+# API ROUTES - ADMIN
+# ========================================
+[[redirects]]
+  from = "/api/admin/*"
+  to = "/.netlify/functions/admin/:splat"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/api/admin"
+  to = "/.netlify/functions/admin"
+  status = 200
+  force = true
+
+# ========================================
+# SPA SUPPORT (MUST BE LAST)
+# ========================================
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# ========================================
+# SECURITY HEADERS
+# ========================================
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-XSS-Protection = "1; mode=block"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "geolocation=(), microphone=(), camera=()"
+    Content-Security-Policy = "default-src 'self' https: data: 'unsafe-inline' 'unsafe-eval'; connect-src 'self' https://rqqqkquovwvsegaluxwe.supabase.co https://api.stripe.com https://api.iconify.design https://api.unisvg.com https://api.simplesvg.com; frame-src https://checkout.stripe.com https://www.paypal.com https://js.stripe.com"
+
+# ========================================
+# CACHE OPTIMIZATION
+# ========================================
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/*.js"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/*.css"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/images/*"
+  [headers.values]
+    Cache-Control = "public, max-age=86400, stale-while-revalidate=604800"
+
+# ========================================
+# ENVIRONMENT VARIABLES (SET IN NETLIFY UI)
+# ========================================
+# Required environment variables:
+# - VITE_SUPABASE_URL
+# - VITE_SUPABASE_ANON_KEY
+# - SUPABASE_SERVICE_ROLE_KEY
+# - JWT_SECRET
+# - JWT_REFRESH_SECRET
+# - STRIPE_SECRET_KEY
+# - STRIPE_WEBHOOK_SECRET
+# - VITE_STRIPE_PUBLISHABLE_KEY
+# - VITE_PAYPAL_CLIENT_ID

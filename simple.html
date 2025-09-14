@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test</title>
+    <style>
+        body { 
+            background: linear-gradient(45deg, #667eea, #764ba2); 
+            color: white; 
+            font-family: Arial; 
+            text-align: center; 
+            padding: 50px; 
+        }
+        h1 { font-size: 3em; margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+    <h1>🐻 TEST PAGE WORKS!</h1>
+    <p>If you see this, the port is working</p>
+    <p>Port: <span id="port"></span></p>
+    <script>
+        document.getElementById('port').textContent = window.location.port;
+    </script>
+</body>
+</html>
