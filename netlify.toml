@@ -11,7 +11,10 @@
 
 [functions]
   node_bundler = "esbuild"
-  external_node_modules = ["stripe", "bcryptjs", "jsonwebtoken"]
+  external_node_modules = ["stripe", "bcryptjs", "jsonwebtoken", "uuid", "@supabase/supabase-js"]
+
+[[plugins]]
+  package = "@netlify/plugin-functions-install-core"
 
 # ========================================
 # API ROUTES - AUTHENTICATION
