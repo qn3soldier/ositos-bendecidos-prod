@@ -161,7 +161,7 @@
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "strict-origin-when-cross-origin"
     Permissions-Policy = "geolocation=(), microphone=(), camera=()"
-    Content-Security-Policy = "default-src 'self' https: data: 'unsafe-inline' 'unsafe-eval'; connect-src 'self' https://rqqqkquovwvsegaluxwe.supabase.co https://api.stripe.com https://api.iconify.design https://api.unisvg.com https://api.simplesvg.com; frame-src https://checkout.stripe.com https://www.paypal.com https://js.stripe.com"
+    Content-Security-Policy = "default-src 'self' https: data: 'unsafe-inline' 'unsafe-eval'; connect-src 'self' https://*.supabase.co https://api.stripe.com https://api.iconify.design https://api.unisvg.com https://api.simplesvg.com; frame-src https://checkout.stripe.com https://www.paypal.com https://js.stripe.com"
 
 # ========================================
 # CACHE OPTIMIZATION
