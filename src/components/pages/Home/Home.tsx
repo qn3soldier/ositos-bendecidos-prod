@@ -418,7 +418,8 @@ const Home: React.FC = () => {
       <AuthModals
         isOpen={showAuthModal}
         onClose={() => setShowAuthModal(false)}
-        initialMode={authMode}
+        mode={authMode}
+        onSwitchMode={() => setAuthMode(authMode === 'login' ? 'register' : 'login')}
       />
     </div>
   );
