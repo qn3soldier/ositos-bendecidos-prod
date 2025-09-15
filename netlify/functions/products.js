@@ -20,6 +20,22 @@ exports.handler = async (event, context) => {
     };
   }
 
+  // Check if environment variables are loaded
+  if (!supabaseUrl || !supabaseServiceKey) {
+    console.error('Missing environment variables in products function:', {
+      supabaseUrl: !!supabaseUrl,
+      supabaseServiceKey: !!supabaseServiceKey
+    });
+    return {
+      statusCode: 500,
+      headers,
+      body: JSON.stringify({
+        success: false,
+        message: 'Server configuration error'
+      })
+    };
+  }
+
   const supabase = createClient(supabaseUrl, supabaseServiceKey);
   const method = event.httpMethod;
   const path = event.path.replace('/.netlify/functions/products', '');

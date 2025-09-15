@@ -51,6 +51,24 @@ exports.handler = async (event, context) => {
     return { statusCode: 200, headers, body: '' };
   }
 
+  // Check if environment variables are loaded
+  if (!supabaseUrl || !supabaseServiceKey) {
+    console.error('Missing environment variables:', {
+      supabaseUrl: !!supabaseUrl,
+      supabaseServiceKey: !!supabaseServiceKey,
+      JWT_SECRET: !!JWT_SECRET,
+      JWT_REFRESH_SECRET: !!JWT_REFRESH_SECRET
+    });
+    return {
+      statusCode: 500,
+      headers,
+      body: JSON.stringify({
+        success: false,
+        message: 'Server configuration error'
+      })
+    };
+  }
+
   const supabase = createClient(supabaseUrl, supabaseServiceKey);
   const path = event.path.replace('/.netlify/functions/auth', '').replace('/api/auth', '');
   const method = event.httpMethod;
