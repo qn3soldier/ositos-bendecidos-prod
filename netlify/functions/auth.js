@@ -1,6 +1,7 @@
 const { createClient } = require('@supabase/supabase-js');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const { v4: uuidv4 } = require('uuid');
 
 // Initialize Supabase
 const supabaseUrl = process.env.VITE_SUPABASE_URL;
@@ -115,6 +116,7 @@ exports.handler = async (event, context) => {
       const { data: newUser, error } = await supabase
         .from('users')
         .insert([{
+          id: uuidv4(),
           email,
           password: hashedPassword,
           first_name: firstName,
