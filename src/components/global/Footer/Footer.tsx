@@ -106,17 +106,20 @@ const Footer: React.FC<FooterProps> = ({ onSubscribe }) => {
             
             {/* Contact Info */}
             <div className="space-y-2">
-              <div className="flex items-center space-x-2 text-sm text-gray-600">
-                <MapPinIcon className="w-4 h-4 text-gold-primary" />
-                <span>United States</span>
-              </div>
-              <div className="flex items-center space-x-2 text-sm text-gray-600">
-                <EnvelopeIcon className="w-4 h-4 text-gold-primary" />
-                <span>hello@ositosbendecidos.com</span>
+              <div className="flex items-start space-x-2 text-sm text-gray-600">
+                <MapPinIcon className="w-4 h-4 text-gold-primary flex-shrink-0 mt-0.5" />
+                <div>
+                  <p>9121 SUNRISE LAKES BLVD UNIT 119</p>
+                  <p>SUNRISE, FL 33322</p>
+                </div>
               </div>
               <div className="flex items-center space-x-2 text-sm text-gray-600">
                 <PhoneIcon className="w-4 h-4 text-gold-primary" />
-                <span>1-800-BLESSED</span>
+                <span>(703)203-1362</span>
+              </div>
+              <div className="flex items-center space-x-2 text-sm text-gray-600">
+                <EnvelopeIcon className="w-4 h-4 text-gold-primary" />
+                <span>info@ositosbendecidos.com</span>
               </div>
             </div>
           </div>
@@ -225,7 +228,7 @@ const Footer: React.FC<FooterProps> = ({ onSubscribe }) => {
           <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
             <div className="text-center md:text-left">
               <p className="text-sm text-gray-600">
-                © 2024 Ositos Bendecidos. Made with{' '}
+                © 2025 Ositos Bendecidos. Made with{' '}
                 <HeartIcon className="inline w-4 h-4 text-red-500 mx-1" />
                 for community building.
               </p>
