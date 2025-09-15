@@ -125,10 +125,11 @@ const Community: React.FC = () => {
           description: requestForm.description,
           category: requestForm.category,
           target_amount: parseFloat(requestForm.amount),
-          location: requestForm.location,
+          // Don't send location as separate field - causes Supabase error
           user_name: requestForm.name || user?.firstName + ' ' + user?.lastName || 'Anonymous',
           age: requestForm.age,
           story: requestForm.story,
+          user_location: requestForm.location, // Send as user_location instead
           status: 'active',
           raised_amount: 0,
           deadline: new Date(Date.now() + 30*24*60*60*1000).toISOString() // 30 days from now
