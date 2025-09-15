@@ -42,20 +42,21 @@ exports.handler = async (event, context) => {
 
   try {
     // Handle /api/products/meta/categories
-    if (path === '/meta/categories') {
+    if (path === '/meta/categories' || path.includes('/meta/categories')) {
       const { data, error } = await supabase
         .from('products')
         .select('category')
+        .eq('status', 'active')
         .order('category');
 
       if (error) throw error;
 
       const uniqueCategories = [...new Set(data.map(p => p.category).filter(Boolean))];
-      
+
       return {
         statusCode: 200,
         headers,
-        body: JSON.stringify({ categories: uniqueCategories })
+        body: JSON.stringify(uniqueCategories) // Return array directly
       };
     }
 
@@ -85,14 +86,7 @@ exports.handler = async (event, context) => {
       return {
         statusCode: 200,
         headers,
-        body: JSON.stringify({ 
-          products: data || [],
-          pagination: {
-            total: count || 0,
-            limit,
-            offset
-          }
-        })
+        body: JSON.stringify(data || []) // Return array directly for GET requests
       };
     }
 

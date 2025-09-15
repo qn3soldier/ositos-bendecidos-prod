@@ -145,7 +145,7 @@ exports.handler = async (event, context) => {
       return {
         statusCode: 200,
         headers,
-        body: JSON.stringify({ success: true, interactions: data })
+        body: JSON.stringify(data || [])
       };
     }
 
@@ -164,7 +164,7 @@ exports.handler = async (event, context) => {
       return {
         statusCode: 200,
         headers,
-        body: JSON.stringify({ success: true, comments: data })
+        body: JSON.stringify(data || [])
       };
     }
 

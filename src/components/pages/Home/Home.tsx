@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 // heroicons not needed here; using ModernIcon wrapper
@@ -6,9 +6,23 @@ import { Button } from '../../ui/Button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../../ui/Card';
 // Logo is not used here anymore
 import ModernIcon from '../../shared/Icon';
+import AuthModals from '../../global/AuthModals';
+import { useAuth } from '../../../contexts/AuthContext';
 
 const Home: React.FC = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
+
+  const handleJoinCommunity = () => {
+    if (user) {
+      navigate('/community');
+    } else {
+      setAuthMode('register');
+      setShowAuthModal(true);
+    }
+  };
 
   return (
     <div className="min-h-screen relative smooth-gradient">
@@ -144,10 +158,10 @@ const Home: React.FC = () => {
                 transition={{ duration: 0.8, delay: 0.4 }}
                 className="space-y-4 max-w-sm mx-auto"
               >
-                <Button 
-                  size="xl" 
-                  variant="gold" 
-                  onClick={() => navigate('/community')}
+                <Button
+                  size="xl"
+                  variant="gold"
+                  onClick={handleJoinCommunity}
                   className="w-full font-bold text-lg py-4 shadow-2xl shadow-yellow-500/30 rounded-2xl"
                 >
                   Join Our Community
@@ -190,10 +204,10 @@ const Home: React.FC = () => {
                 </p>
 
                 <div className="flex gap-6">
-                  <Button 
-                    size="xl" 
-                    variant="gold" 
-                    onClick={() => navigate('/community')}
+                  <Button
+                    size="xl"
+                    variant="gold"
+                    onClick={handleJoinCommunity}
                     className="font-bold text-lg px-8 py-4 shadow-2xl shadow-yellow-500/30 rounded-2xl"
                   >
                     Join Our Community
@@ -399,6 +413,13 @@ const Home: React.FC = () => {
         </section>
 
       </div>
+
+      {/* Auth Modal */}
+      <AuthModals
+        isOpen={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
+        initialMode={authMode}
+      />
     </div>
   );
 };

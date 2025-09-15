@@ -38,24 +38,45 @@ exports.handler = async (event, context) => {
       return {
         statusCode: 200,
         headers,
-        body: JSON.stringify({
-          success: true,
-          opportunities: data || []
-        })
+        body: JSON.stringify(data || []) // Return array directly for GET
       };
     }
 
     // POST /inquiries - Submit investment inquiry
     if (method === 'POST' && path === '/inquiries') {
-      const body = JSON.parse(event.body);
+      let body;
+      try {
+        body = JSON.parse(event.body);
+      } catch (error) {
+        return {
+          statusCode: 400,
+          headers,
+          body: JSON.stringify({
+            success: false,
+            message: 'Invalid JSON body'
+          })
+        };
+      }
+
+      // Validate required fields
+      if (!body.fullName || !body.email || !body.investmentAmount) {
+        return {
+          statusCode: 400,
+          headers,
+          body: JSON.stringify({
+            success: false,
+            message: 'Missing required fields: fullName, email, investmentAmount'
+          })
+        };
+      }
 
       const inquiryData = {
-        full_name: body.fullName,
+        name: body.fullName,
         email: body.email,
-        investment_amount: parseFloat(body.investmentAmount) || 0,
-        interest_area: body.interestArea,
-        message: body.message,
-        receive_updates: body.receiveUpdates || false,
+        amount: parseFloat(body.investmentAmount) || 0,
+        interest_areas: body.interestArea ? [body.interestArea] : [],
+        message: body.message || '',
+        phone: body.phone || null,
         status: 'pending'
       };
 
@@ -65,7 +86,10 @@ exports.handler = async (event, context) => {
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Investment inquiry error:', error);
+        throw error;
+      }
 
       return {
         statusCode: 201,
@@ -142,10 +166,7 @@ exports.handler = async (event, context) => {
       return {
         statusCode: 200,
         headers,
-        body: JSON.stringify({
-          success: true,
-          categories: data || []
-        })
+        body: JSON.stringify(data || []) // Return array directly for GET
       };
     }
 
