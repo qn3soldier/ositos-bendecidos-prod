@@ -23,6 +23,7 @@ import Cart from './components/pages/Cart';
 import Checkout from './components/pages/Checkout';
 import OrderSuccess from './components/pages/OrderSuccess';
 import Privacy from './components/pages/Privacy';
+import DonationSuccess from './components/pages/DonationSuccess';
 
 const AppContent: React.FC = () => {
   const navigate = useNavigate();
@@ -86,6 +87,7 @@ const AppContent: React.FC = () => {
               <Route path="/checkout" element={<Checkout />} />
               <Route path="/order-success" element={<OrderSuccess />} />
               <Route path="/privacy" element={<Privacy />} />
+              <Route path="/donation-success" element={<DonationSuccess />} />
               
               {/* Fallback route */}
               <Route path="*" element={

@@ -64,7 +64,7 @@ exports.handler = async (event, context) => {
       // Update request totals
       const { data: request, error: requestError } = await supabase
         .from('community_requests')
-        .select('raised_amount, goal_amount')
+        .select('raised_amount, target_amount')
         .eq('id', requestId)
         .single();
 
@@ -72,7 +72,8 @@ exports.handler = async (event, context) => {
         const newRaised = (request.raised_amount || 0) + body.amount;
         const updateData = {
           raised_amount: newRaised,
-          status: newRaised >= request.goal_amount ? 'completed' : 'active'
+          donor_count: (request.donor_count || 0) + 1,
+          status: newRaised >= request.target_amount ? 'completed' : 'active'
         };
 
         await supabase

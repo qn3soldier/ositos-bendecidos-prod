@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { HandRaisedIcon, CurrencyDollarIcon, MapPinIcon, ClockIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import { motion } from 'framer-motion';
+import { HandRaisedIcon, CurrencyDollarIcon, MapPinIcon, ClockIcon } from '@heroicons/react/24/outline';
 import GlassCard from '../../shared/GlassCard';
 import GradientButton from '../../shared/GradientButton';
+import DonationModal from '../../shared/DonationModal';
 import { useAuth } from '../../../contexts/AuthContext';
 
 interface CommunityRequest {
@@ -27,10 +28,7 @@ const Community: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   
   // Donation modal state
-  const [showDonationModal, setShowDonationModal] = useState<string | null>(null);
-  const [donationAmount, setDonationAmount] = useState('');
-  const [donationMessage, setDonationMessage] = useState('');
-  const [donationLoading, setDonationLoading] = useState(false);
+  const [selectedRequest, setSelectedRequest] = useState<CommunityRequest | null>(null);
 
   // Form state for submit request
   const [requestForm, setRequestForm] = useState({
@@ -51,7 +49,7 @@ const Community: React.FC = () => {
   const fetchRequests = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/community/requests');
+      const response = await fetch('/.netlify/functions/community/requests');
       if (!response.ok) throw new Error('Failed to fetch requests');
       const data = await response.json();
 
@@ -97,61 +95,16 @@ const Community: React.FC = () => {
       alert('Please log in to make a donation.');
       return;
     }
-    setShowDonationModal(requestId);
-  };
-  
-  const handleDonationSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!donationAmount || !user || !showDonationModal) return;
-    
-    setDonationLoading(true);
-    
-    try {
-      const response = await fetch(`/api/community/requests/${showDonationModal}/donate`, {
-        method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
-        },
-        body: JSON.stringify({
-          amount: parseFloat(donationAmount),
-          user_id: user.id,
-          payment_method: 'direct', // In production, this would be from payment processor
-          payment_id: `donation_${Date.now()}`, // In production, from payment processor
-          message: donationMessage || null
-        })
-      });
-      
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to process donation');
-      }
-      
-      await response.json();
-      
-      // Show success message
-      alert(`Thank you! Your donation of $${donationAmount} has been recorded successfully.`);
-      
-      // Reset form and close modal
-      setDonationAmount('');
-      setDonationMessage('');
-      setShowDonationModal(null);
-      
-      // Refresh requests to show updated amounts
-      await fetchRequests();
-      
-    } catch (err) {
-      console.error('Donation error:', err);
-      alert(`Error processing donation: ${err instanceof Error ? err.message : 'Unknown error'}`);
-    } finally {
-      setDonationLoading(false);
+    const request = requests.find(r => r.id === requestId);
+    if (request) {
+      setSelectedRequest(request);
     }
   };
   
   const closeDonationModal = () => {
-    setShowDonationModal(null);
-    setDonationAmount('');
-    setDonationMessage('');
+    setSelectedRequest(null);
+    // Refresh to show updated amounts
+    fetchRequests();
   };
 
   const handleSubmitRequest = async (e: React.FormEvent) => {
@@ -160,7 +113,7 @@ const Community: React.FC = () => {
     setSubmitLoading(true);
 
     try {
-      const response = await fetch('/api/community/requests', {
+      const response = await fetch('/.netlify/functions/community/requests', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -554,112 +507,16 @@ const Community: React.FC = () => {
         )}
         
         {/* Donation Modal */}
-        <AnimatePresence>
-          {showDonationModal && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 z-50 flex items-center justify-center p-4"
-              style={{ backgroundColor: 'rgba(0, 0, 0, 0.8)' }}
-            >
-              <motion.div
-                initial={{ scale: 0.9, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0.9, opacity: 0 }}
-                className="bg-black/90 backdrop-blur-xl border border-white/20 rounded-2xl p-6 w-full max-w-md"
-              >
-                <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-xl font-semibold text-white">Make a Donation</h3>
-                  <button
-                    onClick={closeDonationModal}
-                    className="text-gray-400 hover:text-white transition-colors"
-                  >
-                    <XMarkIcon className="w-6 h-6" />
-                  </button>
-                </div>
-                
-                {/* Request Info */}
-                <div className="mb-6 p-4 bg-gold-primary/10 border border-gold-primary/20 rounded-lg">
-                  <h4 className="font-medium text-gold-primary mb-2">
-                    {requests.find(r => r.id === showDonationModal)?.title}
-                  </h4>
-                  <p className="text-sm text-gray-300">
-                    ${requests.find(r => r.id === showDonationModal)?.amountRaised.toLocaleString()} raised of 
-                    ${requests.find(r => r.id === showDonationModal)?.amountNeeded.toLocaleString()} goal
-                  </p>
-                </div>
-                
-                <form onSubmit={handleDonationSubmit} className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">
-                      Donation Amount ($)
-                    </label>
-                    <input
-                      type="number"
-                      min="1"
-                      step="0.01"
-                      value={donationAmount}
-                      onChange={(e) => setDonationAmount(e.target.value)}
-                      className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gold-primary/50"
-                      placeholder="Enter amount"
-                      required
-                    />
-                  </div>
-                  
-                  <div className="grid grid-cols-3 gap-2 mb-4">
-                    {[25, 50, 100].map(amount => (
-                      <button
-                        key={amount}
-                        type="button"
-                        onClick={() => setDonationAmount(amount.toString())}
-                        className="px-3 py-2 bg-white/10 hover:bg-white/20 border border-white/20 rounded-lg text-white text-sm transition-colors"
-                      >
-                        ${amount}
-                      </button>
-                    ))}
-                  </div>
-                  
-                  <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">
-                      Optional Message
-                    </label>
-                    <textarea
-                      value={donationMessage}
-                      onChange={(e) => setDonationMessage(e.target.value)}
-                      className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gold-primary/50 resize-none"
-                      rows={3}
-                      placeholder="Add a message of support (optional)"
-                    />
-                  </div>
-                  
-                  <div className="flex space-x-3 pt-4">
-                    <button
-                      type="button"
-                      onClick={closeDonationModal}
-                      className="flex-1 px-4 py-3 bg-white/10 hover:bg-white/20 border border-white/20 rounded-lg text-white transition-colors"
-                    >
-                      Cancel
-                    </button>
-                    <GradientButton
-                      type="submit"
-                      size="md"
-                      variant="gradient"
-                      className="flex-1"
-                      disabled={donationLoading || !donationAmount}
-                    >
-                      {donationLoading ? 'Processing...' : `Donate $${donationAmount || '0'}`}
-                    </GradientButton>
-                  </div>
-                  
-                  <p className="text-xs text-gray-400 text-center mt-4">
-                    🔒 Secure donation processing. Your contribution directly supports community growth.
-                  </p>
-                </form>
-              </motion.div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+        {selectedRequest && (
+          <DonationModal
+            isOpen={true}
+            onClose={closeDonationModal}
+            requestId={selectedRequest.id}
+            requestTitle={selectedRequest.title}
+            requestAmount={selectedRequest.amountNeeded}
+            currentRaised={selectedRequest.amountRaised}
+          />
+        )}
       </div>
     </div>
   );
