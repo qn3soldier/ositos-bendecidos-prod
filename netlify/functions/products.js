@@ -1,7 +1,9 @@
 const { createClient } = require('@supabase/supabase-js');
+const jwt = require('jsonwebtoken');
 
 const supabaseUrl = process.env.VITE_SUPABASE_URL;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const jwtSecret = process.env.JWT_SECRET;
 
 const headers = {
   'Access-Control-Allow-Origin': '*',
@@ -90,6 +92,47 @@ exports.handler = async (event, context) => {
       };
     }
 
+    // Admin-only operations
+    if (method === 'POST' || method === 'PATCH' || method === 'DELETE') {
+      // Check authorization
+      const authHeader = event.headers.authorization || event.headers.Authorization;
+      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return {
+          statusCode: 401,
+          headers,
+          body: JSON.stringify({ success: false, message: 'Unauthorized' })
+        };
+      }
+
+      const token = authHeader.substring(7);
+      let decoded;
+
+      try {
+        decoded = jwt.verify(token, jwtSecret);
+
+        // Verify user is admin
+        const { data: user } = await supabase
+          .from('users')
+          .select('role')
+          .eq('id', decoded.id)
+          .single();
+
+        if (!user || user.role !== 'admin') {
+          return {
+            statusCode: 403,
+            headers,
+            body: JSON.stringify({ success: false, message: 'Admin access required' })
+          };
+        }
+      } catch (error) {
+        return {
+          statusCode: 401,
+          headers,
+          body: JSON.stringify({ success: false, message: 'Invalid token' })
+        };
+      }
+    }
+
     // POST new product
     if (method === 'POST') {
       const body = JSON.parse(event.body);
@@ -105,6 +148,59 @@ exports.handler = async (event, context) => {
         statusCode: 201,
         headers,
         body: JSON.stringify({ success: true, product: data })
+      };
+    }
+
+    // PATCH update product
+    if (method === 'PATCH') {
+      const productId = path.split('/')[1];
+      if (!productId) {
+        return {
+          statusCode: 400,
+          headers,
+          body: JSON.stringify({ success: false, message: 'Product ID required' })
+        };
+      }
+
+      const body = JSON.parse(event.body);
+      const { data, error } = await supabase
+        .from('products')
+        .update(body)
+        .eq('id', productId)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      return {
+        statusCode: 200,
+        headers,
+        body: JSON.stringify({ success: true, product: data })
+      };
+    }
+
+    // DELETE product
+    if (method === 'DELETE') {
+      const productId = path.split('/')[1];
+      if (!productId) {
+        return {
+          statusCode: 400,
+          headers,
+          body: JSON.stringify({ success: false, message: 'Product ID required' })
+        };
+      }
+
+      const { error } = await supabase
+        .from('products')
+        .delete()
+        .eq('id', productId);
+
+      if (error) throw error;
+
+      return {
+        statusCode: 200,
+        headers,
+        body: JSON.stringify({ success: true })
       };
     }
 

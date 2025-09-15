@@ -129,7 +129,7 @@ const AdminDashboard: React.FC = () => {
   ];
 
   const menuItems = [
-    { name: 'Dashboard', path: '/admin', icon: ChartBarIcon, active: true },
+    { name: 'Dashboard', path: '/admin/dashboard', icon: ChartBarIcon, active: true },
     { name: 'Users', path: '/admin/users', icon: UsersIcon },
     { name: 'Prayers', path: '/admin/prayers', icon: HeartIcon },
     { name: 'Products', path: '/admin/products', icon: ShoppingBagIcon },
@@ -357,7 +357,11 @@ const AdminDashboard: React.FC = () => {
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <Button variant="glass" className="font-semibold">
+                  <Button
+                    variant="glass"
+                    className="font-semibold"
+                    onClick={() => navigate('/admin/products')}
+                  >
                     Add Product
                   </Button>
                   <Button variant="glass" className="font-semibold">
