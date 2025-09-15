@@ -100,9 +100,28 @@ exports.handler = async (event, context) => {
     // POST new request
     if (method === 'POST' && path === '/requests') {
       const body = JSON.parse(event.body);
+
+      // Extract user info for beneficiary_info
+      const { user_name, impact_description, ...otherData } = body;
+
+      // Prepare data for insertion
+      const insertData = {
+        ...otherData,
+        beneficiary_info: {
+          name: user_name || 'Anonymous',
+          location: body.location
+        },
+        donor_count: 0,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      };
+
+      // Add impact_description if provided (it's not a column in the DB)
+      // The frontend sends impact_description but DB doesn't have this column
+
       const { data, error } = await supabase
         .from('community_requests')
-        .insert([body])
+        .insert([insertData])
         .select()
         .single();
 
