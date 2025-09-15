@@ -21,7 +21,7 @@ exports.handler = async (event, context) => {
   }
 
   const supabase = createClient(supabaseUrl, supabaseServiceKey);
-  const path = event.path.replace('/api/prayers', '');
+  const path = event.path.replace('/.netlify/functions/prayers', '').replace('/api/prayers', '');
   const method = event.httpMethod;
 
   try {
@@ -128,10 +128,31 @@ exports.handler = async (event, context) => {
       };
     }
 
-    // GET comments
+    // GET interactions (comments)
+    if (method === 'GET' && path.includes('/interactions')) {
+      const prayerId = path.split('/')[1];
+      const type = event.queryStringParameters?.type || 'comment';
+
+      const { data, error } = await supabase
+        .from('prayer_interactions')
+        .select('*')
+        .eq('prayer_id', prayerId)
+        .eq('interaction_type', type)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      return {
+        statusCode: 200,
+        headers,
+        body: JSON.stringify({ success: true, interactions: data })
+      };
+    }
+
+    // GET comments (legacy support)
     if (method === 'GET' && path.includes('/comments')) {
       const prayerId = path.split('/')[1];
-      
+
       const { data, error } = await supabase
         .from('prayer_comments')
         .select('*')

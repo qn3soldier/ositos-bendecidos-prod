@@ -85,23 +85,29 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   // Check for existing user session on mount
   useEffect(() => {
     const initializeAuth = async () => {
+      console.log('Initializing auth...');
       try {
         // Check for migration from old auth system
         const migrated = migrateFromOldAuth();
         if (migrated) {
+          console.log('Migrated from old auth');
           setIsLoading(false);
           return;
         }
 
         if (supabaseAuthAPI.isAuthenticated()) {
+          console.log('User is authenticated, fetching profile...');
           // Try to get fresh user data from server
           const user = await supabaseAuthAPI.getProfile();
+          console.log('Profile fetched:', user);
           setUser(user);
         } else {
-          // Check if there's cached user data
-          const currentUser = supabaseAuthAPI.getCurrentUser();
-          if (currentUser) {
-            setUser(currentUser);
+          console.log('User is not authenticated');
+          // Try to get user from localStorage as fallback
+          const savedUser = supabaseAuthAPI.getCurrentUser();
+          if (savedUser) {
+            console.log('Found user in localStorage:', savedUser);
+            setUser(savedUser);
           }
         }
       } catch (error) {

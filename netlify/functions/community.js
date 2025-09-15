@@ -21,7 +21,7 @@ exports.handler = async (event, context) => {
   }
 
   const supabase = createClient(supabaseUrl, supabaseServiceKey);
-  const path = event.path.replace('/api/community', '');
+  const path = event.path.replace('/.netlify/functions/community', '').replace('/api/community', '');
   const method = event.httpMethod;
 
   try {

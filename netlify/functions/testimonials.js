@@ -43,9 +43,35 @@ exports.handler = async (event, context) => {
     // POST new testimonial
     if (method === 'POST') {
       const body = JSON.parse(event.body);
+
+      // Validate required fields
+      if (!body.name || !body.story) {
+        return {
+          statusCode: 400,
+          headers,
+          body: JSON.stringify({
+            success: false,
+            message: 'Name and story are required'
+          })
+        };
+      }
+
+      // Prepare testimonial data with defaults
+      const testimonialData = {
+        name: body.name,
+        email: body.email || null,
+        story: body.story,
+        location: body.location || null,
+        impact_category: body.impactCategory || null,
+        status: 'pending',
+        is_verified: false,
+        is_featured: false,
+        tags: body.tags || []
+      };
+
       const { data, error } = await supabase
         .from('testimonials')
-        .insert([body])
+        .insert([testimonialData])
         .select()
         .single();
 

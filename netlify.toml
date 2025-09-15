@@ -128,6 +128,21 @@
   force = true
 
 # ========================================
+# API ROUTES - INVESTMENTS
+# ========================================
+[[redirects]]
+  from = "/api/investment-platform/*"
+  to = "/.netlify/functions/investments/:splat"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/api/investments/*"
+  to = "/.netlify/functions/investments/:splat"
+  status = 200
+  force = true
+
+# ========================================
 # API ROUTES - ADMIN
 # ========================================
 [[redirects]]
