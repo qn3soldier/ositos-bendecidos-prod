@@ -1,13 +1,13 @@
 import React, { useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { CheckCircleIcon } from '@heroicons/react/24/outline';
 import { Button } from '../../ui/Button';
 
 const DonationSuccess: React.FC = () => {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-  const _requestId = searchParams.get('requestId'); // Will be used for tracking
+  // const [searchParams] = useSearchParams();
+  // const requestId = searchParams.get('requestId'); // Will be used for tracking
 
   useEffect(() => {
     // Redirect after 5 seconds
