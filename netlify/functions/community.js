@@ -70,9 +70,17 @@ exports.handler = async (event, context) => {
 
       if (!requestError) {
         const newRaised = (request.raised_amount || 0) + body.amount;
+
+        // Get current donor count
+        const { data: currentRequest } = await supabase
+          .from('community_requests')
+          .select('donor_count')
+          .eq('id', requestId)
+          .single();
+
         const updateData = {
           raised_amount: newRaised,
-          donor_count: (request.donor_count || 0) + 1,
+          donor_count: (currentRequest?.donor_count || 0) + 1,
           status: newRaised >= request.target_amount ? 'completed' : 'active'
         };
 

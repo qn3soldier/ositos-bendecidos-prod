@@ -74,6 +74,8 @@ exports.handler = async (event, context) => {
   const path = event.path.replace('/.netlify/functions/auth', '').replace('/api/auth', '');
   const method = event.httpMethod;
 
+  console.log('Auth endpoint called:', { path: event.path, cleanPath: path, method });
+
   try {
     // POST /api/auth/register
     if (method === 'POST' && path === '/register') {
@@ -330,7 +332,7 @@ exports.handler = async (event, context) => {
     }
 
     // GET /api/auth/profile
-    if (method === 'GET' && path === '/profile') {
+    if (method === 'GET' && (path === '/profile' || event.path.includes('/profile'))) {
       const authHeader = event.headers.authorization || event.headers.Authorization;
 
       if (!authHeader || !authHeader.startsWith('Bearer ')) {
