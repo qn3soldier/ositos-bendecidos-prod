@@ -16,7 +16,6 @@ interface CommunityRequest {
   amountRaised: number;
   daysLeft: number;
   submitter: string;
-  growthPlan: string;
 }
 
 const Community: React.FC = () => {
@@ -65,7 +64,7 @@ const Community: React.FC = () => {
         amountRaised: request.raised_amount || 0,
         daysLeft: Math.max(0, Math.ceil((new Date(request.deadline || Date.now() + 30*24*60*60*1000).getTime() - Date.now()) / (1000 * 60 * 60 * 24))),
         submitter: request.user_name || 'Anonymous',
-        growthPlan: request.impact_description || 'Growth plan to be provided'
+        // Remove growthPlan - not in our form anymore
       }));
 
       setRequests(transformedRequests);
@@ -154,7 +153,8 @@ const Community: React.FC = () => {
         category: '',
         amount: '',
         description: '',
-        growthPlan: ''
+        age: '',
+        story: ''
       });
 
       // Switch to browse tab and refresh
