@@ -38,7 +38,8 @@ const Community: React.FC = () => {
     category: '',
     amount: '',
     description: '',
-    growthPlan: ''
+    age: '',
+    story: ''
   });
   const [submitLoading, setSubmitLoading] = useState(false);
 
@@ -126,8 +127,9 @@ const Community: React.FC = () => {
           category: requestForm.category,
           target_amount: parseFloat(requestForm.amount),
           location: requestForm.location,
-          impact_description: requestForm.growthPlan,
           user_name: requestForm.name || user?.firstName + ' ' + user?.lastName || 'Anonymous',
+          age: requestForm.age,
+          story: requestForm.story,
           status: 'active',
           raised_amount: 0,
           deadline: new Date(Date.now() + 30*24*60*60*1000).toISOString() // 30 days from now
@@ -293,10 +295,6 @@ const Community: React.FC = () => {
                             {request.description}
                           </p>
 
-                          <div className="bg-blue-heaven/10 border border-blue-heaven/20 rounded-lg p-4 mb-4">
-                            <h4 className="font-medium text-blue-heaven mb-2">Growth Plan:</h4>
-                            <p className="text-sm text-gray-300">{request.growthPlan}</p>
-                          </div>
 
                           <p className="text-sm text-gray-400">
                             Submitted by: <span className="text-white">{request.submitter}</span>
@@ -479,21 +477,31 @@ const Community: React.FC = () => {
                   />
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
-                    Growth Plan (Required) *
-                  </label>
-                  <textarea
-                    rows={4}
-                    required
-                    placeholder="Detailed plan showing how this help will lead to self-sufficiency and growth..."
-                    value={requestForm.growthPlan}
-                    onChange={(e) => setRequestForm({...requestForm, growthPlan: e.target.value})}
-                    className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-hope/50 resize-none"
-                  />
-                  <p className="text-xs text-gray-400 mt-1">
-                    * We believe in empowerment, not dependency. Please show how this support will help you achieve long-term success.
-                  </p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                      Age (Optional)
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="Age of beneficiary"
+                      value={requestForm.age}
+                      onChange={(e) => setRequestForm({...requestForm, age: e.target.value})}
+                      className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-hope/50"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                      Personal Story (Optional)
+                    </label>
+                    <textarea
+                      rows={4}
+                      placeholder="Share your personal story or background..."
+                      value={requestForm.story}
+                      onChange={(e) => setRequestForm({...requestForm, story: e.target.value})}
+                      className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-hope/50 resize-none"
+                    />
+                  </div>
                 </div>
 
                 <div className="flex justify-center">
