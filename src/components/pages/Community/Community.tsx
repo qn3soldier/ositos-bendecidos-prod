@@ -42,9 +42,9 @@ const Community: React.FC = () => {
       const response = await fetch('/api/community/requests');
       if (!response.ok) throw new Error('Failed to fetch requests');
       const data = await response.json();
-      
+
       // Transform API data to match component interface
-      const transformedRequests = data.requests.map((request: any) => ({
+      const transformedRequests = (Array.isArray(data) ? data : data.requests || []).map((request: any) => ({
         id: request.id,
         title: request.title,
         description: request.description,

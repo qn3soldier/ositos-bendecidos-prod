@@ -175,6 +175,17 @@ export const getProducts = async (params?: {
     }
 
     const data = await response.json();
+    // Handle both old and new API formats
+    if (Array.isArray(data)) {
+      return {
+        products: data,
+        pagination: {
+          total: data.length,
+          limit: params?.limit || 50,
+          offset: params?.offset || 0
+        }
+      };
+    }
     return data;
   } catch (error) {
     console.error('Error fetching products:', error);
@@ -201,12 +212,16 @@ export const getProduct = async (id: string): Promise<Product> => {
 export const getProductCategories = async (): Promise<{categories: string[]}> => {
   try {
     const response = await fetch(`${API_URL}/api/products/meta/categories`);
-    
+
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
 
     const data = await response.json();
+    // Handle both old and new API formats
+    if (Array.isArray(data)) {
+      return { categories: data };
+    }
     return data;
   } catch (error) {
     console.error('Error fetching categories:', error);

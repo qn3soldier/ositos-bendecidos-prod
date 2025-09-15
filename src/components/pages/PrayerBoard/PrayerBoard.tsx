@@ -35,9 +35,9 @@ const PrayerBoard: React.FC = () => {
       const response = await fetch('/api/prayers');
       if (!response.ok) throw new Error('Failed to fetch prayers');
       const data = await response.json();
-      
+
       // Transform API data to match component interface
-      const transformedPrayers = data.prayers.map((prayer: any) => ({
+      const transformedPrayers = (Array.isArray(data) ? data : data.prayers || []).map((prayer: any) => ({
         id: prayer.id,
         user: prayer.user_name || 'Anonymous',
         content: prayer.content,
