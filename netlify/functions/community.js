@@ -102,16 +102,15 @@ exports.handler = async (event, context) => {
       const body = JSON.parse(event.body);
 
       // Extract fields that need special handling
-      const { user_name, age, story, location, ...otherData } = body;
+      const { user_name, age, story, ...otherData } = body;
 
-      // Prepare data for insertion
+      // Prepare data for insertion - location stays in otherData
       const insertData = {
         ...otherData,
-        location: location, // location is a direct field in DB
         beneficiary_info: {
           name: user_name || 'Anonymous',
           age: age || null,
-          location: location,
+          location: body.location || '',
           story: story || ''
         },
         donor_count: 0,
