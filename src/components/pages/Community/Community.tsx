@@ -31,7 +31,19 @@ const Community: React.FC = () => {
   const [donationAmount, setDonationAmount] = useState('');
   const [donationMessage, setDonationMessage] = useState('');
   const [donationLoading, setDonationLoading] = useState(false);
-  
+
+  // Form state for submit request
+  const [requestForm, setRequestForm] = useState({
+    name: '',
+    location: '',
+    title: '',
+    category: '',
+    amount: '',
+    description: '',
+    growthPlan: ''
+  });
+  const [submitLoading, setSubmitLoading] = useState(false);
+
   useEffect(() => {
     fetchRequests();
   }, []);
@@ -51,12 +63,12 @@ const Community: React.FC = () => {
         location: request.location || 'Not specified',
         category: request.category,
         amountNeeded: request.target_amount || 0,
-        amountRaised: request.raised || 0,
+        amountRaised: request.raised_amount || 0,
         daysLeft: Math.max(0, Math.ceil((new Date(request.deadline || Date.now() + 30*24*60*60*1000).getTime() - Date.now()) / (1000 * 60 * 60 * 24))),
         submitter: request.user_name || 'Anonymous',
         growthPlan: request.impact_description || 'Growth plan to be provided'
       }));
-      
+
       setRequests(transformedRequests);
     } catch (err) {
       console.error('Error fetching requests:', err);
@@ -70,10 +82,10 @@ const Community: React.FC = () => {
 
   const categories = [
     { value: 'all', label: 'All Requests' },
-    { value: 'Business', label: 'Business' },
-    { value: 'Education', label: 'Education' },
-    { value: 'Health', label: 'Health' },
-    { value: 'Housing', label: 'Housing' }
+    { value: 'business', label: 'Business' },
+    { value: 'education', label: 'Education' },
+    { value: 'medical', label: 'Health' },
+    { value: 'housing', label: 'Housing' }
   ];
 
   const filteredRequests = requests.filter(request => 
@@ -140,6 +152,66 @@ const Community: React.FC = () => {
     setShowDonationModal(null);
     setDonationAmount('');
     setDonationMessage('');
+  };
+
+  const handleSubmitRequest = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    setSubmitLoading(true);
+
+    try {
+      const response = await fetch('/api/community/requests', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(user ? { 'Authorization': `Bearer ${localStorage.getItem('accessToken')}` } : {})
+        },
+        body: JSON.stringify({
+          user_id: user?.id || null,
+          title: requestForm.title,
+          description: requestForm.description,
+          category: requestForm.category,
+          target_amount: parseFloat(requestForm.amount),
+          location: requestForm.location,
+          impact_description: requestForm.growthPlan,
+          user_name: requestForm.name || user?.firstName + ' ' + user?.lastName || 'Anonymous',
+          status: 'active',
+          raised_amount: 0,
+          deadline: new Date(Date.now() + 30*24*60*60*1000).toISOString() // 30 days from now
+        })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to submit request');
+      }
+
+      await response.json();
+
+      // Show success message
+      alert('Your request has been submitted successfully! It will be reviewed by our team.');
+
+      // Reset form
+      setRequestForm({
+        name: '',
+        location: '',
+        title: '',
+        category: '',
+        amount: '',
+        description: '',
+        growthPlan: ''
+      });
+
+      // Switch to browse tab and refresh
+      setActiveTab('browse');
+      await fetchRequests();
+
+    } catch (err) {
+      console.error('Submit error:', err);
+      alert(`Error submitting request: ${err instanceof Error ? err.message : 'Unknown error'}`);
+    } finally {
+      setSubmitLoading(false);
+    }
   };
 
   return (
@@ -365,7 +437,7 @@ const Community: React.FC = () => {
                 )}
               </div>
               
-              <form className="space-y-6">
+              <form className="space-y-6" onSubmit={handleSubmitRequest}>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <label className="block text-sm font-medium text-gray-300 mb-2">
@@ -374,6 +446,8 @@ const Community: React.FC = () => {
                     <input
                       type="text"
                       required
+                      value={requestForm.name}
+                      onChange={(e) => setRequestForm({...requestForm, name: e.target.value})}
                       className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-hope/50"
                     />
                   </div>
@@ -385,6 +459,8 @@ const Community: React.FC = () => {
                       type="text"
                       required
                       placeholder="City, State"
+                      value={requestForm.location}
+                      onChange={(e) => setRequestForm({...requestForm, location: e.target.value})}
                       className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-hope/50"
                     />
                   </div>
@@ -398,6 +474,8 @@ const Community: React.FC = () => {
                     type="text"
                     required
                     placeholder="Brief, clear description of your need"
+                    value={requestForm.title}
+                    onChange={(e) => setRequestForm({...requestForm, title: e.target.value})}
                     className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-hope/50"
                   />
                 </div>
@@ -406,15 +484,17 @@ const Community: React.FC = () => {
                   <label className="block text-sm font-medium text-gray-300 mb-2">
                     Category
                   </label>
-                  <select 
+                  <select
                     required
+                    value={requestForm.category}
+                    onChange={(e) => setRequestForm({...requestForm, category: e.target.value})}
                     className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-green-hope/50"
                   >
                     <option value="">Select a category</option>
-                    <option value="Business">Business</option>
-                    <option value="Education">Education</option>
-                    <option value="Health">Health</option>
-                    <option value="Housing">Housing</option>
+                    <option value="business">Business</option>
+                    <option value="education">Education</option>
+                    <option value="medical">Health</option>
+                    <option value="housing">Housing</option>
                   </select>
                 </div>
 
@@ -426,6 +506,8 @@ const Community: React.FC = () => {
                     type="number"
                     required
                     placeholder="5000"
+                    value={requestForm.amount}
+                    onChange={(e) => setRequestForm({...requestForm, amount: e.target.value})}
                     className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-hope/50"
                   />
                 </div>
@@ -438,6 +520,8 @@ const Community: React.FC = () => {
                     rows={4}
                     required
                     placeholder="Explain your situation, background, and specific needs..."
+                    value={requestForm.description}
+                    onChange={(e) => setRequestForm({...requestForm, description: e.target.value})}
                     className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-hope/50 resize-none"
                   />
                 </div>
@@ -450,6 +534,8 @@ const Community: React.FC = () => {
                     rows={4}
                     required
                     placeholder="Detailed plan showing how this help will lead to self-sufficiency and growth..."
+                    value={requestForm.growthPlan}
+                    onChange={(e) => setRequestForm({...requestForm, growthPlan: e.target.value})}
                     className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-hope/50 resize-none"
                   />
                   <p className="text-xs text-gray-400 mt-1">
@@ -458,8 +544,8 @@ const Community: React.FC = () => {
                 </div>
 
                 <div className="flex justify-center">
-                  <GradientButton type="submit" size="lg" variant="gradient">
-                    Submit Request for Review
+                  <GradientButton type="submit" size="lg" variant="gradient" disabled={submitLoading}>
+                    {submitLoading ? 'Submitting...' : 'Submit Request for Review'}
                   </GradientButton>
                 </div>
               </form>
