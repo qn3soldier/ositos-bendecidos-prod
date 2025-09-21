@@ -43,7 +43,7 @@ exports.handler = async (event, context) => {
         const { data: donation, error: donationError } = await supabase
           .from('donations')
           .update({
-            payment_status: 'completed',
+            status: 'completed',  // Changed from payment_status to status
             completed_at: new Date().toISOString()
           })
           .eq('payment_intent_id', paymentIntent.id)
@@ -86,7 +86,7 @@ exports.handler = async (event, context) => {
         await supabase
           .from('donations')
           .update({
-            payment_status: 'failed',
+            status: 'failed',  // Changed from payment_status to status
             failed_at: new Date().toISOString()
           })
           .eq('payment_intent_id', failedPayment.id);

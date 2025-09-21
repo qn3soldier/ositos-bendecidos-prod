@@ -61,7 +61,7 @@ exports.handler = async (event, context) => {
         request_id: requestId,
         amount: amount,
         payment_intent_id: paymentIntent.id,
-        payment_status: 'pending',
+        status: 'pending',  // Changed from payment_status to status
         donor_name: donorName || 'Anonymous',
         donor_email: donorEmail || null,
         payment_method: 'stripe'
