@@ -14,7 +14,7 @@ import {
 } from '@heroicons/react/24/outline';
 import GlassCard from '../../shared/GlassCard';
 import GradientButton from '../../shared/GradientButton';
-import StripePayment from '../../payment/StripePayment';
+// import StripePayment from '../../payment/StripePayment'; - не используется, редиректим на Stripe Checkout
 import PayPalPayment from '../../payment/PayPalPayment';
 import { useCart } from '../../../contexts/CartContext';
 import { loadStripe } from '@stripe/stripe-js';
@@ -612,19 +612,15 @@ const Checkout: React.FC = () => {
                       {/* Stripe Payment */}
                       {formData.paymentMethod === 'card' && (
                         <div>
-                          <h3 className="text-lg font-medium text-gold-primary mb-4">Card Details</h3>
-                          <StripePayment
-                            amount={total}
-                            orderData={{
-                              orderId: `OB-${Date.now()}`,
-                              email: formData.email,
-                              customerName: `${formData.firstName} ${formData.lastName}`
-                            }}
-                            onSuccess={handlePayPalSuccess}
-                            onError={handlePaymentError}
-                            isProcessing={isProcessing}
-                            setIsProcessing={setIsProcessing}
-                          />
+                          <h3 className="text-lg font-medium text-gold-primary mb-4">Payment Information</h3>
+                          <p className="text-zinc-400 mb-4">You will be redirected to Stripe for secure payment processing.</p>
+                          <GradientButton
+                            onClick={handleStripeCheckout}
+                            disabled={isProcessing}
+                            className="w-full"
+                          >
+                            {isProcessing ? 'Processing...' : 'Proceed to Payment'}
+                          </GradientButton>
                         </div>
                       )}
 
