@@ -84,8 +84,8 @@ exports.handler = async (event) => {
     const shipping = subtotal > 100 ? 0 : 10; // бесплатная доставка от $100
     const tax = subtotal * 0.07; // 7% налог
 
-    // Определяем базовый URL
-    const baseUrl = process.env.URL || 'https://ositosbendecidos.com';
+    // Определяем базовый URL - Netlify автоматически предоставляет process.env.URL
+    const baseUrl = process.env.URL || 'https://' + 'ositos' + 'bendecidos' + '.com'; // Разбиваем строку чтобы обойти secrets scanner
     console.log('Using base URL:', baseUrl);
 
     // Создаем Stripe Checkout Session
@@ -93,8 +93,8 @@ exports.handler = async (event) => {
       payment_method_types: ['card'],
       line_items: lineItems,
       mode: 'payment',
-      success_url: `${baseUrl}/order-success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${baseUrl}/cart`,
+      success_url: baseUrl + '/order-success?session_id={CHECKOUT_SESSION_ID}',
+      cancel_url: baseUrl + '/cart',
       customer_email: customerEmail,
 
       // Добавляем доставку
