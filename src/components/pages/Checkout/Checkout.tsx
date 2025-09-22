@@ -194,12 +194,17 @@ const Checkout: React.FC = () => {
         }),
       });
 
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to create checkout session');
+      }
+
       const { sessionId, url } = await response.json();
 
       if (url) {
         // Redirect to Stripe Checkout
         window.location.href = url;
-      } else {
+      } else if (sessionId) {
         // Fallback to embedded checkout
         const stripe = await stripePromise;
         const { error } = await stripe!.redirectToCheckout({ sessionId });
@@ -207,6 +212,8 @@ const Checkout: React.FC = () => {
         if (error) {
           throw error;
         }
+      } else {
+        throw new Error('No session ID or URL returned from server');
       }
     } catch (error) {
       console.error('Checkout failed:', error);

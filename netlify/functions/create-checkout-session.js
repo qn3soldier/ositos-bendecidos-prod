@@ -27,7 +27,20 @@ exports.handler = async (event) => {
   }
 
   try {
+    console.log('Received checkout request:', event.body);
+
+    // Check if Stripe key exists
+    if (!process.env.STRIPE_SECRET_KEY) {
+      throw new Error('Stripe secret key not configured');
+    }
     const { items, customerEmail, customerName, shippingAddress } = JSON.parse(event.body);
+
+    console.log('Parsed data:', {
+      itemCount: items?.length,
+      customerEmail,
+      customerName,
+      hasShippingAddress: !!shippingAddress
+    });
 
     if (!items || items.length === 0) {
       return {
@@ -135,10 +148,14 @@ exports.handler = async (event) => {
 
   } catch (error) {
     console.error('Error creating checkout session:', error);
+    console.error('Error stack:', error.stack);
     return {
       statusCode: 500,
       headers,
-      body: JSON.stringify({ error: error.message })
+      body: JSON.stringify({
+        error: error.message,
+        details: process.env.NODE_ENV === 'development' ? error.stack : undefined
+      })
     };
   }
 };
