@@ -59,6 +59,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     setIsLoading(true);
     try {
       await supabaseAuthAPI.logout();
+      // Очищаем localStorage при выходе
+      localStorage.removeItem('cart');
+      // Перезагружаем страницу чтобы все контексты обновились
+      window.location.href = '/';
     } catch (error) {
       console.error('Logout error:', error);
     } finally {
