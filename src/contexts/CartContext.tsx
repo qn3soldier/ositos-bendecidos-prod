@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import type { ReactNode } from 'react';
+import { useAuth } from './AuthContext';
 
 export interface CartItem {
   id: string;
@@ -24,6 +25,7 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [items, setItems] = useState<CartItem[]>([]);
+  const { user } = useAuth();
 
   // Загружаем корзину из localStorage при инициализации
   useEffect(() => {
@@ -33,9 +35,19 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   }, []);
 
+  // Очищаем корзину когда user становится null (logout)
+  useEffect(() => {
+    if (user === null) {
+      setItems([]);
+      localStorage.removeItem('cart');
+    }
+  }, [user]);
+
   // Сохраняем корзину в localStorage при изменении
   useEffect(() => {
-    localStorage.setItem('cart', JSON.stringify(items));
+    if (items.length > 0) {
+      localStorage.setItem('cart', JSON.stringify(items));
+    }
   }, [items]);
 
   const addToCart = (newItem: Omit<CartItem, 'quantity'>) => {
