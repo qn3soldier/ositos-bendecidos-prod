@@ -76,8 +76,8 @@ exports.handler = async (event) => {
       payment_method_types: ['card'],
       line_items: lineItems,
       mode: 'payment',
-      success_url: `${process.env.URL || 'https://ositosbendecidos.com'}/order-success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.URL || 'https://ositosbendecidos.com'}/cart`,
+      success_url: `${process.env.URL || process.env.VITE_FRONTEND_URL}/order-success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${process.env.URL || process.env.VITE_FRONTEND_URL}/cart`,
       customer_email: customerEmail,
 
       // Добавляем доставку
