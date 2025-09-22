@@ -59,14 +59,22 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     setIsLoading(true);
     try {
       await supabaseAuthAPI.logout();
-      // Очищаем localStorage при выходе
-      localStorage.removeItem('cart');
-      // Перезагружаем страницу чтобы все контексты обновились
-      window.location.href = '/';
+
+      // Enterprise approach: emit custom event for cleanup
+      window.dispatchEvent(new CustomEvent('user-logout'));
+
+      // Clear user data
+      setUser(null);
+
+      // Navigate to home (better than full reload)
+      if (window.location.pathname !== '/') {
+        window.location.href = '/';
+      }
     } catch (error) {
       console.error('Logout error:', error);
-    } finally {
+      // Even on error, clear local state
       setUser(null);
+    } finally {
       setIsLoading(false);
     }
   };

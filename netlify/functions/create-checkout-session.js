@@ -1,9 +1,12 @@
-const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+const { getConfig } = require('./utils/config');
+const config = getConfig();
+const stripe = require('stripe')(config.get('stripeSecretKey'));
 const { createClient } = require('@supabase/supabase-js');
 
+const supabaseConfig = config.getSupabaseConfig();
 const supabase = createClient(
-  process.env.VITE_SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY
+  supabaseConfig.url,
+  supabaseConfig.serviceKey
 );
 
 const headers = {
@@ -84,23 +87,16 @@ exports.handler = async (event) => {
     const shipping = subtotal > 100 ? 0 : 10; // бесплатная доставка от $100
     const tax = subtotal * 0.07; // 7% налог
 
-    // Netlify автоматически предоставляет process.env.URL для production
-    // Fallback на хардкод если URL не задан
-    const baseUrl = process.env.URL || 'https://ositosbendecidos.com';
-
-    console.log('Using base URL:', baseUrl);
-
-    if (!baseUrl) {
-      throw new Error('URL environment variable not configured. Please check Netlify settings.');
-    }
+    // Get checkout URLs from centralized config
+    const urls = config.getCheckoutUrls();
 
     // Создаем Stripe Checkout Session
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       line_items: lineItems,
       mode: 'payment',
-      success_url: baseUrl + '/order-success?session_id={CHECKOUT_SESSION_ID}',
-      cancel_url: baseUrl + '/cart',
+      success_url: urls.success,
+      cancel_url: urls.cancel,
       customer_email: customerEmail,
 
       // Добавляем доставку

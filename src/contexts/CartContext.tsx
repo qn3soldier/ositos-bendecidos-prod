@@ -29,14 +29,37 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   useEffect(() => {
     const savedCart = localStorage.getItem('cart');
     if (savedCart) {
-      setItems(JSON.parse(savedCart));
+      try {
+        setItems(JSON.parse(savedCart));
+      } catch (error) {
+        console.error('Failed to parse cart from localStorage:', error);
+        localStorage.removeItem('cart');
+      }
     }
   }, []);
 
   // Сохраняем корзину в localStorage при изменении
   useEffect(() => {
-    localStorage.setItem('cart', JSON.stringify(items));
+    if (items.length > 0) {
+      localStorage.setItem('cart', JSON.stringify(items));
+    } else {
+      localStorage.removeItem('cart');
+    }
   }, [items]);
+
+  // Enterprise: Listen for logout event to clear cart
+  useEffect(() => {
+    const handleLogout = () => {
+      setItems([]);
+      localStorage.removeItem('cart');
+    };
+
+    window.addEventListener('user-logout', handleLogout);
+
+    return () => {
+      window.removeEventListener('user-logout', handleLogout);
+    };
+  }, []);
 
   const addToCart = (newItem: Omit<CartItem, 'quantity'>) => {
     setItems(currentItems => {
