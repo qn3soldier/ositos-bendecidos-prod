@@ -41,3 +41,7 @@ dist-ssr
 # Functions node_modules
 functions/node_modules
 netlify/functions/node_modules
+
+# Documentation with sensitive info - DO NOT COMMIT
+CLAUDE.md
+NETLIFY_ENV_REQUIRED.md
