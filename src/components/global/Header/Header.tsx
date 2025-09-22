@@ -99,9 +99,9 @@ const Header: React.FC<HeaderProps> = ({
           
           {/* Left: New Logo */}
           <Link to="/" className="flex items-center flex-shrink-0">
-            <img 
-              src="/ositos-logo-new.PNG" 
-              alt="Ositos Bendecidos" 
+            <img
+              src="/ositos-logo-gold.png"
+              alt="Ositos Bendecidos"
               className="h-16 sm:h-32 w-auto object-contain"
             />
           </Link>
