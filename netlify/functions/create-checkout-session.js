@@ -1,12 +1,9 @@
-const { getConfig } = require('./utils/config');
-const config = getConfig();
-const stripe = require('stripe')(config.get('stripeSecretKey'));
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const { createClient } = require('@supabase/supabase-js');
 
-const supabaseConfig = config.getSupabaseConfig();
 const supabase = createClient(
-  supabaseConfig.url,
-  supabaseConfig.serviceKey
+  process.env.VITE_SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE_KEY
 );
 
 const headers = {
@@ -87,16 +84,16 @@ exports.handler = async (event) => {
     const shipping = subtotal > 100 ? 0 : 10; // бесплатная доставка от $100
     const tax = subtotal * 0.07; // 7% налог
 
-    // Get checkout URLs from centralized config
-    const urls = config.getCheckoutUrls();
+    // Simple URL with fallback
+    const baseUrl = process.env.URL || 'https://ositosbendecidos.com';
 
     // Создаем Stripe Checkout Session
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       line_items: lineItems,
       mode: 'payment',
-      success_url: urls.success,
-      cancel_url: urls.cancel,
+      success_url: `${baseUrl}/order-success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${baseUrl}/cart`,
       customer_email: customerEmail,
 
       // Добавляем доставку
