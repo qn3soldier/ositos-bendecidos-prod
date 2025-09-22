@@ -32,14 +32,14 @@ const AdminDashboard: React.FC = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [stats, setStats] = useState<DashboardStats>({
-    totalUsers: 247,
-    totalPrayers: 1893,
-    totalDonations: 45600,
-    totalProducts: 8,
-    totalRevenue: 128500,
-    activeRequests: 12,
-    testimonialCount: 34,
-    investmentTotal: 250000
+    totalUsers: 0,
+    totalPrayers: 0,
+    totalDonations: 0,
+    totalProducts: 0,
+    totalRevenue: 0,
+    activeRequests: 0,
+    testimonialCount: 0,
+    investmentTotal: 0
   });
   const [loading, setLoading] = useState(false);
 
@@ -129,13 +129,8 @@ const AdminDashboard: React.FC = () => {
   ];
 
   const menuItems = [
-    { name: 'Dashboard', path: '/admin/dashboard', icon: ChartBarIcon, active: true },
-    { name: 'Users', path: '/admin/users', icon: UsersIcon },
-    { name: 'Prayers', path: '/admin/prayers', icon: HeartIcon },
-    { name: 'Products', path: '/admin/products', icon: ShoppingBagIcon },
-    { name: 'Donations', path: '/admin/donations', icon: CurrencyDollarIcon },
-    { name: 'Community', path: '/admin/community', icon: ChatBubbleLeftIcon },
-    { name: 'Settings', path: '/admin/settings', icon: Cog6ToothIcon }
+    { name: 'Products', path: '/admin/products', icon: ShoppingBagIcon, active: window.location.pathname === '/admin/products' },
+    { name: 'Database Manager', path: '/admin/database', icon: Cog6ToothIcon, active: window.location.pathname === '/admin/database' }
   ];
 
   return (
@@ -181,7 +176,7 @@ const AdminDashboard: React.FC = () => {
         <div className="w-64 min-h-screen border-r border-zinc-800/50">
           <div className="p-6">
             <h2 className="text-2xl font-black bg-gradient-to-r from-yellow-400 via-yellow-300 to-amber-400 bg-clip-text text-transparent mb-8">
-              Admin Panel
+              Admin Tools
             </h2>
             <nav className="space-y-2">
               {menuItems.map((item) => (
@@ -231,9 +226,9 @@ const AdminDashboard: React.FC = () => {
             <div className="flex items-center justify-between">
               <div>
                 <h1 className="text-4xl font-black bg-gradient-to-r from-yellow-400 via-yellow-300 to-amber-400 bg-clip-text text-transparent">
-                  Dashboard Overview
+                  Admin Control
                 </h1>
-                <p className="text-zinc-400 mt-1">Welcome back to admin panel</p>
+                <p className="text-zinc-400 mt-1">Manage products and database</p>
               </div>
               <div className="flex items-center space-x-4">
                 <div className="text-right">
@@ -254,128 +249,52 @@ const AdminDashboard: React.FC = () => {
             </div>
           </div>
 
-          {/* Stats Grid */}
+          {/* Main Actions */}
           <div className="p-8">
-            {loading ? (
-              <div className="flex items-center justify-center h-64">
-                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-yellow-400"></div>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {statCards.map((stat, index) => (
-                  <motion.div
-                    key={stat.title}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.1 }}
-                  >
-                    <Card className="border-zinc-800/50 hover:border-yellow-500/30 transition-all duration-500 group">
-                      <div className="absolute inset-0 bg-gradient-to-br from-yellow-500/5 to-amber-500/5 opacity-0 group-hover:opacity-100 transition-all duration-500" />
-                      <CardContent className="p-6 relative z-10">
-                        <div className="flex items-center justify-between mb-4">
-                          <div className={`w-12 h-12 bg-gradient-to-br ${stat.gradient} rounded-xl flex items-center justify-center shadow-lg`}>
-                            <stat.icon className="w-6 h-6 text-black" />
-                          </div>
-                          <span className="text-green-400 text-sm font-semibold">
-                            {stat.change}
-                          </span>
-                        </div>
-                        <h3 className="text-zinc-400 text-sm mb-1">{stat.title}</h3>
-                        <p className="text-2xl font-black bg-gradient-to-r from-yellow-400 to-amber-400 bg-clip-text text-transparent">
-                          {typeof stat.value === 'number' ? stat.value.toLocaleString() : stat.value}
-                        </p>
-                      </CardContent>
-                    </Card>
-                  </motion.div>
-                ))}
-              </div>
-            )}
-
-            {/* Recent Activity Section */}
-            <div className="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Recent Prayers */}
-              <Card className="border-zinc-800/50">
-                <CardHeader>
-                  <CardTitle className="text-xl font-black bg-gradient-to-r from-yellow-400 to-amber-400 bg-clip-text text-transparent">
-                    Recent Prayers
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  {[1, 2, 3].map(i => (
-                    <div key={i} className="flex items-center justify-between py-3 border-b border-zinc-800/50 last:border-0">
-                      <div className="flex items-center space-x-3">
-                        <div className="w-8 h-8 bg-gradient-to-r from-yellow-500/20 to-amber-500/20 rounded-full flex items-center justify-center">
-                          <HeartIcon className="w-4 h-4 text-yellow-400" />
-                        </div>
-                        <div>
-                          <p className="text-zinc-300 text-sm">Prayer Request #{i}</p>
-                          <p className="text-xs text-zinc-500">2 minutes ago</p>
-                        </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 }}
+              >
+                <Card
+                  className="border-zinc-800/50 hover:border-yellow-500/30 transition-all duration-500 group cursor-pointer"
+                  onClick={() => navigate('/admin/products')}
+                >
+                  <CardContent className="p-8">
+                    <div className="flex flex-col items-center text-center">
+                      <div className="w-16 h-16 bg-gradient-to-br from-yellow-400 to-amber-400 rounded-xl flex items-center justify-center shadow-lg mb-4">
+                        <ShoppingBagIcon className="w-8 h-8 text-black" />
                       </div>
-                      <button className="text-yellow-400 text-sm hover:underline">
-                        View
-                      </button>
+                      <h3 className="text-2xl font-bold text-yellow-400 mb-2">Manage Products</h3>
+                      <p className="text-zinc-400">Add, edit, delete products in shop</p>
                     </div>
-                  ))}
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </Card>
+              </motion.div>
 
-              {/* Recent Donations */}
-              <Card className="border-zinc-800/50">
-                <CardHeader>
-                  <CardTitle className="text-xl font-black bg-gradient-to-r from-yellow-400 to-amber-400 bg-clip-text text-transparent">
-                    Recent Donations
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  {[1, 2, 3].map(i => (
-                    <div key={i} className="flex items-center justify-between py-3 border-b border-zinc-800/50 last:border-0">
-                      <div className="flex items-center space-x-3">
-                        <div className="w-8 h-8 bg-gradient-to-r from-yellow-500/20 to-amber-500/20 rounded-full flex items-center justify-center">
-                          <CurrencyDollarIcon className="w-4 h-4 text-yellow-400" />
-                        </div>
-                        <div>
-                          <p className="text-zinc-300 text-sm">$100 Donation</p>
-                          <p className="text-xs text-zinc-500">5 minutes ago</p>
-                        </div>
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+              >
+                <Card
+                  className="border-zinc-800/50 hover:border-yellow-500/30 transition-all duration-500 group cursor-pointer"
+                  onClick={() => navigate('/admin/database')}
+                >
+                  <CardContent className="p-8">
+                    <div className="flex flex-col items-center text-center">
+                      <div className="w-16 h-16 bg-gradient-to-br from-red-500 to-red-600 rounded-xl flex items-center justify-center shadow-lg mb-4">
+                        <Cog6ToothIcon className="w-8 h-8 text-white" />
                       </div>
-                      <span className="text-green-400 text-sm font-semibold">
-                        Completed
-                      </span>
+                      <h3 className="text-2xl font-bold text-red-400 mb-2">Database Manager</h3>
+                      <p className="text-zinc-400">Delete any record from any table</p>
                     </div>
-                  ))}
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </Card>
+              </motion.div>
             </div>
 
-            {/* Quick Actions */}
-            <Card className="mt-8 border-zinc-800/50">
-              <CardHeader>
-                <CardTitle className="text-xl font-black bg-gradient-to-r from-yellow-400 to-amber-400 bg-clip-text text-transparent">
-                  Quick Actions
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <Button
-                    variant="glass"
-                    className="font-semibold"
-                    onClick={() => navigate('/admin/products')}
-                  >
-                    Add Product
-                  </Button>
-                  <Button variant="glass" className="font-semibold">
-                    View Reports
-                  </Button>
-                  <Button variant="glass" className="font-semibold">
-                    Send Newsletter
-                  </Button>
-                  <Button variant="glass" className="font-semibold">
-                    Export Data
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
           </div>
         </div>
       </div>

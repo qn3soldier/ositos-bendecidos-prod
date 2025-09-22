@@ -18,6 +18,7 @@ import AdminPanel from './components/pages/Admin';
 import AdminDashboard from './components/pages/Admin/AdminDashboard';
 import AdminLogin from './components/pages/Admin/AdminLogin';
 import ProductsManager from './components/pages/Admin/ProductsManager';
+import DatabaseManager from './components/pages/Admin/DatabaseManager';
 import IconDemo from './components/pages/IconDemo';
 import Cart from './components/pages/Cart';
 import Checkout from './components/pages/Checkout';
@@ -81,6 +82,7 @@ const AppContent: React.FC = () => {
               <Route path="/admin/login" element={<AdminLogin />} />
               <Route path="/admin/dashboard" element={<AdminDashboard />} />
               <Route path="/admin/products" element={<ProductsManager />} />
+              <Route path="/admin/database" element={<DatabaseManager />} />
               <Route path="/admin" element={<AdminLogin />} />
               <Route path="/icons" element={<IconDemo />} />
               <Route path="/cart" element={<Cart />} />

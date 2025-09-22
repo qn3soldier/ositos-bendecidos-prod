@@ -17,7 +17,9 @@ import GradientButton from '../../shared/GradientButton';
 import StripePayment from '../../payment/StripePayment';
 import PayPalPayment from '../../payment/PayPalPayment';
 import { useCart } from '../../../contexts/CartContext';
-import { createOrder } from '../../../services/api';
+import { loadStripe } from '@stripe/stripe-js';
+
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
 
 interface CheckoutForm {
   // Personal Info
@@ -169,56 +171,46 @@ const Checkout: React.FC = () => {
     }
   };
 
-  const handlePaymentSuccess = async (paymentIntent: any) => {
+  const handleStripeCheckout = async () => {
     try {
       setIsProcessing(true);
-      
-      // Create order in backend
-      const orderData = {
-        items,
-        customerInfo: {
-          firstName: formData.firstName,
-          lastName: formData.lastName,
-          email: formData.email,
-          phone: formData.phone
-        },
-        shippingInfo: {
-          address: formData.address,
-          city: formData.city,
-          state: formData.state,
-          zipCode: formData.zipCode,
-          country: formData.country,
-          shippingMethod: formData.shippingMethod
-        },
-        totals: {
-          subtotal,
-          tax,
-          shipping: shippingCost,
-          total
-        },
-        paymentMethod: formData.paymentMethod,
-        paymentIntentId: paymentIntent.id
-      };
 
-      const response = await createOrder(orderData);
-      
-      if (response.success) {
-        // Clear cart and redirect to success page
-        clearCart();
-        navigate('/order-success', { 
-          state: { 
-            orderNumber: response.orderId,
-            total,
-            email: formData.email,
-            paymentIntentId: paymentIntent.id
+      const response = await fetch('/.netlify/functions/create-checkout-session', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          items,
+          customerEmail: formData.email,
+          customerName: `${formData.firstName} ${formData.lastName}`,
+          shippingAddress: {
+            street: formData.address,
+            city: formData.city,
+            state: formData.state,
+            zip: formData.zipCode,
+            country: formData.country
           }
-        });
+        }),
+      });
+
+      const { sessionId, url } = await response.json();
+
+      if (url) {
+        // Redirect to Stripe Checkout
+        window.location.href = url;
       } else {
-        throw new Error(response.message || 'Failed to create order');
+        // Fallback to embedded checkout
+        const stripe = await stripePromise;
+        const { error } = await stripe!.redirectToCheckout({ sessionId });
+
+        if (error) {
+          throw error;
+        }
       }
     } catch (error) {
-      console.error('Order creation failed:', error);
-      alert('Order creation failed. Please contact support.');
+      console.error('Checkout failed:', error);
+      alert('Checkout failed. Please try again.');
     } finally {
       setIsProcessing(false);
     }
@@ -772,18 +764,14 @@ const Checkout: React.FC = () => {
                       Continue
                     </GradientButton>
                   ) : (
-                    <>
-                      {formData.paymentMethod === 'card' && (
-                        <p className="text-gray-400 text-sm">
-                          Complete payment using the card form above
-                        </p>
-                      )}
-                      {formData.paymentMethod === 'paypal' && (
-                        <p className="text-gray-400 text-sm">
-                          Complete payment using PayPal buttons above
-                        </p>
-                      )}
-                    </>
+                    <GradientButton
+                      variant="gradient"
+                      onClick={handleStripeCheckout}
+                      disabled={isProcessing}
+                      className="min-w-[200px]"
+                    >
+                      {isProcessing ? 'Processing...' : `Pay $${total.toFixed(2)}`}
+                    </GradientButton>
                   )}
                 </div>
               </div>

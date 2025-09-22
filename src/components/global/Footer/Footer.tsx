@@ -45,6 +45,7 @@ const Footer: React.FC<FooterProps> = ({ onSubscribe }) => {
     { label: 'Contact', href: '/contact' },
     { label: 'Privacy Policy', href: '/privacy' },
     { label: 'Terms of Service', href: '/terms' },
+    { label: 'Admin Portal', href: '/admin' },
   ];
 
   const socialLinks = [
