@@ -84,13 +84,17 @@ exports.handler = async (event) => {
     const shipping = subtotal > 100 ? 0 : 10; // бесплатная доставка от $100
     const tax = subtotal * 0.07; // 7% налог
 
+    // Определяем базовый URL
+    const baseUrl = process.env.URL || 'https://ositosbendecidos.com';
+    console.log('Using base URL:', baseUrl);
+
     // Создаем Stripe Checkout Session
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       line_items: lineItems,
       mode: 'payment',
-      success_url: `${process.env.URL || process.env.VITE_FRONTEND_URL}/order-success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.URL || process.env.VITE_FRONTEND_URL}/cart`,
+      success_url: `${baseUrl}/order-success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${baseUrl}/cart`,
       customer_email: customerEmail,
 
       // Добавляем доставку
