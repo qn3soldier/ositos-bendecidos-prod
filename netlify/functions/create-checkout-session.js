@@ -84,16 +84,15 @@ exports.handler = async (event) => {
     const shipping = subtotal > 100 ? 0 : 10; // бесплатная доставка от $100
     const tax = subtotal * 0.07; // 7% налог
 
-    // Use Netlify's automatic URL environment variable
-    // URL is automatically provided by Netlify for the site
-    // DEPLOY_URL and SITE_NAME are fallbacks
-    const baseUrl = process.env.URL || process.env.DEPLOY_URL || process.env.FRONTEND_URL;
+    // Get the frontend URL from environment variable
+    // FRONTEND_URL must be set in Netlify Environment Variables
+    const baseUrl = process.env.FRONTEND_URL || process.env.URL || process.env.DEPLOY_URL;
 
     if (!baseUrl) {
       console.error('No URL environment variable found. Available:', {
+        FRONTEND_URL: process.env.FRONTEND_URL,
         URL: process.env.URL,
-        DEPLOY_URL: process.env.DEPLOY_URL,
-        FRONTEND_URL: process.env.FRONTEND_URL
+        DEPLOY_URL: process.env.DEPLOY_URL
       });
       throw new Error('Frontend URL not configured. Please add FRONTEND_URL to Netlify environment variables.');
     }
