@@ -38,6 +38,9 @@ exports.handler = async (event, context) => {
     case 'payment_intent.succeeded':
       const paymentIntent = stripeEvent.data.object;
 
+      console.log('Webhook received payment_intent.succeeded:', paymentIntent.id);
+      console.log('Metadata:', paymentIntent.metadata);
+
       try {
         // Update donation status
         const { data: donation, error: donationError } = await supabase
@@ -50,7 +53,11 @@ exports.handler = async (event, context) => {
           .select()
           .single();
 
-        if (donationError) throw donationError;
+        if (donationError) {
+          console.error('Error updating donation:', donationError);
+          throw donationError;
+        }
+        console.log('Donation updated:', donation);
 
         // Update community request raised amount
         const { data: request, error: requestError } = await supabase
@@ -59,11 +66,16 @@ exports.handler = async (event, context) => {
           .eq('id', paymentIntent.metadata.requestId)
           .single();
 
-        if (!requestError && request) {
+        if (requestError) {
+          console.error('Error fetching request:', requestError);
+        } else if (request) {
           const newRaised = (request.raised_amount || 0) + (paymentIntent.amount / 100);
           const newDonorCount = (request.donor_count || 0) + 1;
 
-          await supabase
+          console.log('Updating request:', paymentIntent.metadata.requestId);
+          console.log('New raised amount:', newRaised);
+
+          const { error: updateError } = await supabase
             .from('community_requests')
             .update({
               raised_amount: newRaised,
@@ -71,6 +83,12 @@ exports.handler = async (event, context) => {
               status: newRaised >= request.target_amount ? 'completed' : 'active'
             })
             .eq('id', paymentIntent.metadata.requestId);
+
+          if (updateError) {
+            console.error('Error updating request:', updateError);
+          } else {
+            console.log('Request updated successfully!');
+          }
         }
 
         console.log('Payment processed successfully:', paymentIntent.id);
