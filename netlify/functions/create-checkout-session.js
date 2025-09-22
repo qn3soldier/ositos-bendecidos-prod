@@ -84,8 +84,13 @@ exports.handler = async (event) => {
     const shipping = subtotal > 100 ? 0 : 10; // бесплатная доставка от $100
     const tax = subtotal * 0.07; // 7% налог
 
-    // Определяем базовый URL - Netlify автоматически предоставляет process.env.URL
-    const baseUrl = process.env.URL || 'https://' + 'ositos' + 'bendecidos' + '.com'; // Разбиваем строку чтобы обойти secrets scanner
+    // Netlify автоматически предоставляет process.env.URL для production
+    const baseUrl = process.env.URL;
+
+    if (!baseUrl) {
+      throw new Error('URL environment variable not configured. Please check Netlify settings.');
+    }
+
     console.log('Using base URL:', baseUrl);
 
     // Создаем Stripe Checkout Session
