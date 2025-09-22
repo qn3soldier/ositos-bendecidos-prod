@@ -227,7 +227,8 @@ const Checkout: React.FC = () => {
       setIsProcessing(true);
       
       // Create order in backend with PayPal payment details
-      const orderData = {
+      // TODO: Implement order creation with PayPal details
+      /* const orderData = {
         items,
         customerInfo: {
           firstName: formData.firstName,
@@ -252,9 +253,11 @@ const Checkout: React.FC = () => {
         paymentMethod: formData.paymentMethod,
         paypalOrderId: paymentDetails.id,
         paypalDetails: paymentDetails
-      };
+      }; */
 
-      const response = await createOrder(orderData);
+      // TODO: Implement order creation API call
+      const response = { success: false, orderId: null, message: 'Order creation not implemented' };
+      // const response = await createOrder(orderData);
       
       if (response.success) {
         // Clear cart and redirect to success page
@@ -617,7 +620,7 @@ const Checkout: React.FC = () => {
                               email: formData.email,
                               customerName: `${formData.firstName} ${formData.lastName}`
                             }}
-                            onSuccess={handlePaymentSuccess}
+                            onSuccess={handlePayPalSuccess}
                             onError={handlePaymentError}
                             isProcessing={isProcessing}
                             setIsProcessing={setIsProcessing}

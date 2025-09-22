@@ -1,13 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import {
-  ChartBarIcon,
-  UsersIcon,
   ShoppingBagIcon,
-  HeartIcon,
-  CurrencyDollarIcon,
-  ChatBubbleLeftIcon,
-  ArrowTrendingUpIcon,
   ClockIcon,
   Cog6ToothIcon,
   ArrowRightOnRectangleIcon
@@ -15,33 +9,16 @@ import {
 import { useAuth } from '../../../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '../../ui/Button';
-import { Card, CardContent, CardHeader, CardTitle } from '../../ui/Card';
+import { Card, CardContent } from '../../ui/Card';
 
-interface DashboardStats {
-  totalUsers: number;
-  totalPrayers: number;
-  totalDonations: number;
-  totalProducts: number;
-  totalRevenue: number;
-  activeRequests: number;
-  testimonialCount: number;
-  investmentTotal: number;
-}
+// DashboardStats interface removed as it's not currently used
 
 const AdminDashboard: React.FC = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
-  const [stats, setStats] = useState<DashboardStats>({
-    totalUsers: 0,
-    totalPrayers: 0,
-    totalDonations: 0,
-    totalProducts: 0,
-    totalRevenue: 0,
-    activeRequests: 0,
-    testimonialCount: 0,
-    investmentTotal: 0
-  });
-  const [loading, setLoading] = useState(false);
+  // Stats removed as they're not currently used
+  // Will be implemented when dashboard is expanded
+  const [, setLoading] = useState(false);
 
   const fetchDashboardStats = async () => {
     try {
@@ -52,19 +29,11 @@ const AdminDashboard: React.FC = () => {
           'Authorization': `Bearer ${token}`
         }
       });
-      
+
       if (response.ok) {
         const data = await response.json();
-        setStats({
-          totalUsers: data.stats?.users?.total || 247,
-          totalPrayers: data.stats?.prayers?.total || 1893,
-          totalDonations: data.stats?.donations?.total_amount || 45600,
-          totalProducts: data.stats?.products?.total || 8,
-          totalRevenue: data.stats?.donations?.total_amount || 128500,
-          activeRequests: data.stats?.community?.open_requests || 12,
-          testimonialCount: data.stats?.testimonials?.total || 34,
-          investmentTotal: 250000
-        });
+        // Stats would be set here if we had setStats
+        console.log('Dashboard stats:', data);
       }
     } catch (error) {
       console.error('Error fetching stats:', error);
@@ -83,7 +52,8 @@ const AdminDashboard: React.FC = () => {
     fetchDashboardStats();
   }, [user, navigate]);
 
-  const statCards = [
+  // Not currently used in the simplified dashboard
+  /* const statCards = [
     {
       title: 'Total Users',
       value: stats.totalUsers,
@@ -126,7 +96,7 @@ const AdminDashboard: React.FC = () => {
       change: '+30%',
       gradient: 'from-yellow-400 via-yellow-300 to-amber-400'
     }
-  ];
+  ]; */
 
   const menuItems = [
     { name: 'Products', path: '/admin/products', icon: ShoppingBagIcon, active: window.location.pathname === '/admin/products' },

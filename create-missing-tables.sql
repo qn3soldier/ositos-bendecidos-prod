@@ -44,7 +44,26 @@ CREATE TABLE IF NOT EXISTS order_items (
   created_at TIMESTAMP DEFAULT NOW()
 );
 
--- 3. Prayer comments table
+-- 3. General donations table (for main donation page)
+CREATE TABLE IF NOT EXISTS general_donations (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES users(id) ON DELETE SET NULL,
+  stripe_payment_intent_id VARCHAR(255) UNIQUE,
+  amount DECIMAL(10,2) NOT NULL,
+  currency VARCHAR(3) DEFAULT 'USD',
+  donor_name VARCHAR(255) DEFAULT 'Anonymous',
+  donor_email VARCHAR(255),
+  message TEXT,
+  is_anonymous BOOLEAN DEFAULT false,
+  purpose VARCHAR(100) DEFAULT 'general_fund',
+  status VARCHAR(50) DEFAULT 'pending',
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_general_donations_status ON general_donations(status);
+CREATE INDEX IF NOT EXISTS idx_general_donations_stripe ON general_donations(stripe_payment_intent_id);
+
+-- 4. Prayer comments table
 CREATE TABLE IF NOT EXISTS prayer_comments (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   prayer_id UUID REFERENCES prayers(id) ON DELETE CASCADE,
