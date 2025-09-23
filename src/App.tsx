@@ -15,7 +15,6 @@ import Investment from './components/pages/Investment';
 import Testimonials from './components/pages/Testimonials';
 import Donate from './components/pages/Donate';
 import AdminPanel from './components/pages/Admin';
-import AdminDashboard from './components/pages/Admin/AdminDashboard';
 import AdminLogin from './components/pages/Admin/AdminLogin';
 import ProductsManager from './components/pages/Admin/ProductsManager';
 import DatabaseManager from './components/pages/Admin/DatabaseManager';
@@ -78,12 +77,11 @@ const AppContent: React.FC = () => {
               <Route path="/invest" element={<Investment />} />
               <Route path="/testimonials" element={<Testimonials />} />
               <Route path="/donate" element={<Donate />} />
-              <Route path="/admin-old" element={<AdminPanel />} />
               <Route path="/admin/login" element={<AdminLogin />} />
-              <Route path="/admin/dashboard" element={<AdminDashboard />} />
+              <Route path="/admin/dashboard" element={<AdminPanel />} />
               <Route path="/admin/products" element={<ProductsManager />} />
               <Route path="/admin/database" element={<DatabaseManager />} />
-              <Route path="/admin" element={<AdminLogin />} />
+              <Route path="/admin" element={<AdminPanel />} />
               <Route path="/icons" element={<IconDemo />} />
               <Route path="/cart" element={<Cart />} />
               <Route path="/checkout" element={<Checkout />} />

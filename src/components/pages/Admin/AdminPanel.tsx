@@ -143,8 +143,8 @@ const AdminPanel: React.FC = () => {
       price: product.price,
       description: product.description,
       category: product.category,
-      image_url: product.image_url,
-      stock: product.stock
+      image_url: product.image_url || '',
+      stock: product.stock || 0
     });
     setShowEditProductModal(true);
   };
@@ -187,14 +187,28 @@ const AdminPanel: React.FC = () => {
 
     try {
       const fileExt = file.name.split('.').pop();
-      const fileName = `${Math.random()}.${fileExt}`;
-      const filePath = `products/${fileName}`;
+      const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
+      const filePath = `${fileName}`;
 
+      // Пробуем загрузить с правильными опциями
       const { error: uploadError } = await supabase.storage
         .from('products')
-        .upload(filePath, file);
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: false
+        });
 
-      if (uploadError) throw uploadError;
+      if (uploadError) {
+        console.error('Storage upload error:', uploadError);
+
+        // Если ошибка RLS, показываем понятное сообщение
+        if (uploadError.message?.includes('row-level security')) {
+          alert('Image upload failed: Storage permissions not configured. Please run the SQL script fix-storage-permissions.sql in Supabase');
+        } else {
+          alert(`Failed to upload image: ${uploadError.message}`);
+        }
+        throw uploadError;
+      }
 
       const { data: { publicUrl } } = supabase.storage
         .from('products')
@@ -203,7 +217,6 @@ const AdminPanel: React.FC = () => {
       setNewProduct(prev => ({ ...prev, image_url: publicUrl }));
     } catch (error) {
       console.error('Error uploading image:', error);
-      alert('Failed to upload image');
     }
   };
 
