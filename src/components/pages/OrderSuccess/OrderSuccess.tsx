@@ -15,22 +15,39 @@ const OrderSuccess: React.FC = () => {
   const location = useLocation();
   const [searchParams] = useSearchParams();
   const sessionId = searchParams.get('session_id');
-  const { orderNumber, total, email } = location.state || {};
+  const [orderData, setOrderData] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // If we have session_id from Stripe, we could fetch order details
-    // For now, just show success message
-    if (sessionId) {
-      setIsLoading(false);
-      // TODO: Fetch order details using session_id
-    } else if (!orderNumber) {
-      setIsLoading(false);
-    }
-  }, [sessionId, orderNumber]);
+    const fetchOrder = async () => {
+      if (!sessionId) {
+        setIsLoading(false);
+        return;
+      }
 
-  // If no order data and no session_id, show error
-  if (!orderNumber && !sessionId && !isLoading) {
+      try {
+        const response = await fetch(`/.netlify/functions/get-order?session_id=${sessionId}`);
+        const data = await response.json();
+
+        if (data.success && data.order) {
+          setOrderData(data.order);
+        } else {
+          setError('Order not found');
+        }
+      } catch (err) {
+        console.error('Error fetching order:', err);
+        setError('Failed to load order details');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchOrder();
+  }, [sessionId]);
+
+  // If error or no order data after loading
+  if (error || (!orderData && !isLoading && !sessionId)) {
     return (
       <div className="min-h-screen py-12">
         <div className="container mx-auto px-4">
@@ -56,8 +73,9 @@ const OrderSuccess: React.FC = () => {
     );
   }
 
-  // Show success page if we have session_id (from Stripe) or orderNumber (from state)
-  if (sessionId || orderNumber) {
+  // Show success page if we have order data
+  if (orderData) {
+    const { orderNumber, total, customerEmail, customerName, items, fulfillmentStatus } = orderData;
     return (
       <div className="min-h-screen py-12">
         <div className="container mx-auto px-4">
@@ -137,7 +155,7 @@ const OrderSuccess: React.FC = () => {
                   <div className="flex justify-between items-center py-3 border-b border-gray-700">
                     <span className="text-gray-300">Order Status:</span>
                     <span className="px-3 py-1 bg-blue-500/20 text-blue-400 rounded-full text-sm font-medium">
-                      Processing
+                      {fulfillmentStatus || 'Processing'}
                     </span>
                   </div>
                   
@@ -145,6 +163,24 @@ const OrderSuccess: React.FC = () => {
                     <span className="text-gray-300">Estimated Delivery:</span>
                     <span className="text-white">3-5 business days</span>
                   </div>
+
+                  {items && items.length > 0 && (
+                    <div className="mt-4 pt-4 border-t border-gray-700">
+                      <h3 className="text-lg font-semibold text-white mb-3">Order Items:</h3>
+                      <div className="space-y-2">
+                        {items.map((item: any, index: number) => (
+                          <div key={index} className="flex justify-between items-center">
+                            <span className="text-gray-300">
+                              {item.product_name} x{item.quantity}
+                            </span>
+                            <span className="text-white">
+                              ${item.subtotal?.toFixed(2)}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               </GlassCard>
             </motion.div>
