@@ -50,42 +50,8 @@ exports.handler = async (event) => {
       };
     }
 
-    // Создаем line items для Stripe
-    const lineItems = await Promise.all(items.map(async (item) => {
-      // Получаем актуальную цену из БД
-      const { data: product } = await supabase
-        .from('products')
-        .select('price, name')
-        .eq('id', item.id)
-        .single();
-
-      if (!product) {
-        throw new Error(`Product ${item.id} not found`);
-      }
-
-      return {
-        price_data: {
-          currency: 'usd',
-          product_data: {
-            name: product.name,
-            images: item.image ? [item.image] : [],
-            metadata: {
-              product_id: item.id
-            }
-          },
-          unit_amount: Math.round(product.price * 100) // конвертируем в центы
-        },
-        quantity: item.quantity
-      };
-    }));
-
-    // Считаем итоговую сумму
-    const subtotal = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-    const shipping = subtotal > 100 ? 0 : 10; // бесплатная доставка от $100
-    const tax = subtotal * 0.07; // 7% налог
-
+    // Get base URL early for image processing
     // Netlify provides URL automatically as a read-only environment variable
-    // It should contain the full site URL (either Netlify subdomain or custom domain)
     let baseUrl = process.env.URL;
 
     // Debug logging to see what's available
@@ -107,6 +73,45 @@ exports.handler = async (event) => {
 
       console.warn('Using fallback URL:', baseUrl);
     }
+
+    // Создаем line items для Stripe
+    const lineItems = await Promise.all(items.map(async (item) => {
+      // Получаем актуальную цену из БД
+      const { data: product } = await supabase
+        .from('products')
+        .select('price, name')
+        .eq('id', item.id)
+        .single();
+
+      if (!product) {
+        throw new Error(`Product ${item.id} not found`);
+      }
+
+      // Ensure image URL is absolute for Stripe
+      const imageUrl = item.image
+        ? (item.image.startsWith('http') ? item.image : `${baseUrl}${item.image}`)
+        : null;
+
+      return {
+        price_data: {
+          currency: 'usd',
+          product_data: {
+            name: product.name,
+            images: imageUrl ? [imageUrl] : [],
+            metadata: {
+              product_id: item.id
+            }
+          },
+          unit_amount: Math.round(product.price * 100) // конвертируем в центы
+        },
+        quantity: item.quantity
+      };
+    }));
+
+    // Считаем итоговую сумму
+    const subtotal = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    const shipping = subtotal > 100 ? 0 : 10; // бесплатная доставка от $100
+    const tax = subtotal * 0.07; // 7% налог
 
     // Создаем Stripe Checkout Session
     const session = await stripe.checkout.sessions.create({
