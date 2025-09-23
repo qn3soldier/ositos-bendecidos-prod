@@ -85,34 +85,49 @@ const AdminPanel: React.FC = () => {
   }
 
   const handleAddProduct = async () => {
-    if (!newProduct.name || !newProduct.price) return;
+    if (!newProduct.name || !newProduct.price) {
+      alert('Please fill in product name and price');
+      return;
+    }
 
     try {
       const token = localStorage.getItem('accessToken');
+      console.log('Adding product with data:', newProduct);
+
+      const productData = {
+        name: newProduct.name,
+        description: newProduct.description,
+        price: newProduct.price,
+        category: newProduct.category,
+        stock: newProduct.stock || 0,
+        status: 'active',
+        image_url: newProduct.image_url || '/golden-bear.png'
+      };
+
       const response = await fetch('/.netlify/functions/products', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({
-          name: newProduct.name,
-          description: newProduct.description,
-          price: newProduct.price,
-          category: newProduct.category,
-          stock: newProduct.stock || 0,
-          status: 'active',
-          image_url: newProduct.image_url || '/golden-bear.png'
-        })
+        body: JSON.stringify(productData)
       });
 
+      console.log('Add response status:', response.status);
+
       if (response.ok) {
+        alert('Product added successfully!');
         fetchProducts();
         setNewProduct({ name: '', price: 0, description: '', category: 'clothing', image_url: '', stock: 0 });
         setShowAddProductModal(false);
+      } else {
+        const errorData = await response.text();
+        console.error('Add failed:', response.status, errorData);
+        alert(`Failed to add product: ${response.status} ${errorData}`);
       }
     } catch (error) {
       console.error('Error adding product:', error);
+      alert(`Error adding product: ${error}`);
     }
   };
 
@@ -121,6 +136,8 @@ const AdminPanel: React.FC = () => {
 
     try {
       const token = localStorage.getItem('accessToken');
+      console.log('Deleting product:', productId, 'with token:', token ? 'present' : 'missing');
+
       const response = await fetch(`/.netlify/functions/products/${productId}`, {
         method: 'DELETE',
         headers: {
@@ -128,11 +145,19 @@ const AdminPanel: React.FC = () => {
         }
       });
 
+      console.log('Delete response status:', response.status);
+
       if (response.ok) {
+        alert('Product deleted successfully!');
         fetchProducts();
+      } else {
+        const errorData = await response.text();
+        console.error('Delete failed:', response.status, errorData);
+        alert(`Failed to delete product: ${response.status} ${errorData}`);
       }
     } catch (error) {
       console.error('Error deleting product:', error);
+      alert(`Error deleting product: ${error}`);
     }
   };
 
@@ -154,30 +179,42 @@ const AdminPanel: React.FC = () => {
 
     try {
       const token = localStorage.getItem('accessToken');
+      console.log('Updating product:', editingProduct.id, 'with data:', newProduct);
+
+      const updateData = {
+        name: newProduct.name,
+        description: newProduct.description,
+        price: newProduct.price,
+        category: newProduct.category,
+        stock: newProduct.stock,
+        image_url: newProduct.image_url || '/golden-bear.png'
+      };
+
       const response = await fetch(`/.netlify/functions/products/${editingProduct.id}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({
-          name: newProduct.name,
-          description: newProduct.description,
-          price: newProduct.price,
-          category: newProduct.category,
-          stock: newProduct.stock,
-          image_url: newProduct.image_url || '/golden-bear.png'
-        })
+        body: JSON.stringify(updateData)
       });
 
+      console.log('Update response status:', response.status);
+
       if (response.ok) {
+        alert('Product updated successfully!');
         fetchProducts();
         setNewProduct({ name: '', price: 0, description: '', category: 'clothing', image_url: '', stock: 0 });
         setEditingProduct(null);
         setShowEditProductModal(false);
+      } else {
+        const errorData = await response.text();
+        console.error('Update failed:', response.status, errorData);
+        alert(`Failed to update product: ${response.status} ${errorData}`);
       }
     } catch (error) {
       console.error('Error updating product:', error);
+      alert(`Error updating product: ${error}`);
     }
   };
 
