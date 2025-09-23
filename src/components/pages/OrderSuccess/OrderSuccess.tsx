@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Link, useLocation } from 'react-router-dom';
-import { 
+import { Link, useLocation, useSearchParams } from 'react-router-dom';
+import {
   CheckCircleIcon,
   EnvelopeIcon,
   PrinterIcon,
@@ -13,10 +13,24 @@ import GradientButton from '../../shared/GradientButton';
 
 const OrderSuccess: React.FC = () => {
   const location = useLocation();
+  const [searchParams] = useSearchParams();
+  const sessionId = searchParams.get('session_id');
   const { orderNumber, total, email } = location.state || {};
+  const [isLoading, setIsLoading] = useState(true);
 
-  // If no order data, redirect to home
-  if (!orderNumber) {
+  useEffect(() => {
+    // If we have session_id from Stripe, we could fetch order details
+    // For now, just show success message
+    if (sessionId) {
+      setIsLoading(false);
+      // TODO: Fetch order details using session_id
+    } else if (!orderNumber) {
+      setIsLoading(false);
+    }
+  }, [sessionId, orderNumber]);
+
+  // If no order data and no session_id, show error
+  if (!orderNumber && !sessionId && !isLoading) {
     return (
       <div className="min-h-screen py-12">
         <div className="container mx-auto px-4">
@@ -42,22 +56,24 @@ const OrderSuccess: React.FC = () => {
     );
   }
 
-  return (
-    <div className="min-h-screen py-12">
-      <div className="container mx-auto px-4">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          className="max-w-4xl mx-auto"
-        >
-          {/* Success Header */}
-          <div className="text-center mb-12">
-            <motion.div
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
-              className="w-24 h-24 mx-auto mb-6 bg-gradient-to-r from-green-500 to-green-600 rounded-full flex items-center justify-center"
+  // Show success page if we have session_id (from Stripe) or orderNumber (from state)
+  if (sessionId || orderNumber) {
+    return (
+      <div className="min-h-screen py-12">
+        <div className="container mx-auto px-4">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            className="max-w-4xl mx-auto"
+          >
+            {/* Success Header */}
+            <div className="text-center mb-12">
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+                className="w-24 h-24 mx-auto mb-6 bg-gradient-to-r from-green-500 to-green-600 rounded-full flex items-center justify-center"
             >
               <CheckCircleIcon className="w-12 h-12 text-white" />
             </motion.div>
@@ -277,6 +293,17 @@ const OrderSuccess: React.FC = () => {
             </GlassCard>
           </motion.div>
         </motion.div>
+      </div>
+    </div>
+    );
+  }
+
+  // Loading state
+  return (
+    <div className="min-h-screen py-12 flex items-center justify-center">
+      <div className="text-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gold-primary mx-auto mb-4"></div>
+        <p className="text-gray-300">Processing your order...</p>
       </div>
     </div>
   );
