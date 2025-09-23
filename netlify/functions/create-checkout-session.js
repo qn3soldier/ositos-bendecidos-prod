@@ -84,17 +84,28 @@ exports.handler = async (event) => {
     const shipping = subtotal > 100 ? 0 : 10; // бесплатная доставка от $100
     const tax = subtotal * 0.07; // 7% налог
 
-    // Get the frontend URL from environment variable
-    // FRONTEND_URL must be set in Netlify Environment Variables
-    const baseUrl = process.env.FRONTEND_URL || process.env.URL || process.env.DEPLOY_URL;
+    // Netlify provides URL automatically as a read-only environment variable
+    // It should contain the full site URL (either Netlify subdomain or custom domain)
+    let baseUrl = process.env.URL;
+
+    // Debug logging to see what's available
+    console.log('Netlify Environment Variables:', {
+      URL: process.env.URL,
+      SITE_NAME: process.env.SITE_NAME,
+      SITE_ID: process.env.SITE_ID,
+      FRONTEND_URL: process.env.FRONTEND_URL
+    });
 
     if (!baseUrl) {
-      console.error('No URL environment variable found. Available:', {
-        FRONTEND_URL: process.env.FRONTEND_URL,
-        URL: process.env.URL,
-        DEPLOY_URL: process.env.DEPLOY_URL
-      });
-      throw new Error('Frontend URL not configured. Please add FRONTEND_URL to Netlify environment variables.');
+      // If URL is not available, try fallbacks
+      baseUrl = process.env.FRONTEND_URL || process.env.DEPLOY_URL;
+
+      if (!baseUrl) {
+        console.error('Critical: No URL environment variable found. This should be provided automatically by Netlify.');
+        throw new Error('Site URL not available. Check Netlify function configuration.');
+      }
+
+      console.warn('Using fallback URL:', baseUrl);
     }
 
     // Создаем Stripe Checkout Session
