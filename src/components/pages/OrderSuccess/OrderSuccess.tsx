@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Link, useLocation, useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import {
   CheckCircleIcon,
   EnvelopeIcon,
@@ -12,7 +12,6 @@ import GlassCard from '../../shared/GlassCard';
 import GradientButton from '../../shared/GradientButton';
 
 const OrderSuccess: React.FC = () => {
-  const location = useLocation();
   const [searchParams] = useSearchParams();
   const sessionId = searchParams.get('session_id');
   const [orderData, setOrderData] = useState<any>(null);
@@ -75,7 +74,7 @@ const OrderSuccess: React.FC = () => {
 
   // Show success page if we have order data
   if (orderData) {
-    const { orderNumber, total, customerEmail, customerName, items, fulfillmentStatus } = orderData;
+    const { orderNumber, total, customerEmail, items, fulfillmentStatus } = orderData;
     return (
       <div className="min-h-screen py-12">
         <div className="container mx-auto px-4">
@@ -202,7 +201,7 @@ const OrderSuccess: React.FC = () => {
                     <div>
                       <h3 className="text-gold-primary font-semibold mb-1">Confirmation Email</h3>
                       <p className="text-gray-300 text-sm">
-                        We've sent a confirmation email to {email} with your order details and tracking information.
+                        We've sent a confirmation email to {customerEmail} with your order details and tracking information.
                       </p>
                     </div>
                   </div>
