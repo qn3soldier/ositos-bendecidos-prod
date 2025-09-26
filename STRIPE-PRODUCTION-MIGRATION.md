@@ -20,7 +20,7 @@
 - **Как настроить:**
   1. Stripe Dashboard → Developers → Webhooks
   2. Переключиться на "Live mode" (вверху справа)
-  3. Add endpoint → URL: `https://ositosbendecidos.com/.netlify/functions/stripe-webhook`
+  3. Add endpoint → URL: `https://[YOUR-DOMAIN]/.netlify/functions/stripe-webhook`
   4. Events to listen:
      - `payment_intent.succeeded`
      - `checkout.session.completed`
@@ -31,7 +31,7 @@
 - **Новый (production):** `whsec_...` (для production webhook)
 - **Как настроить:**
   1. Stripe Dashboard → Developers → Webhooks (Live mode)
-  2. Add endpoint → URL: `https://ositosbendecidos.com/.netlify/functions/stripe-webhook-orders`
+  2. Add endpoint → URL: `https://[YOUR-DOMAIN]/.netlify/functions/stripe-webhook-orders`
   3. Events to listen:
      - `checkout.session.completed`
      - `payment_intent.succeeded`
