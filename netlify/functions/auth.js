@@ -77,9 +77,11 @@ exports.handler = async (event, context) => {
   console.log('Auth endpoint called:', { path: event.path, cleanPath: path, method });
 
   try {
+    const requestBody = event.body ? JSON.parse(event.body) : {};
+
     // POST /api/auth/register
     if (method === 'POST' && path === '/register') {
-      const { email, password, firstName, lastName } = JSON.parse(event.body);
+      const { email, password, firstName, lastName } = requestBody;
 
       // Validate input
       if (!email || !password || !firstName || !lastName) {
@@ -152,9 +154,12 @@ exports.handler = async (event, context) => {
       };
     }
 
-    // POST /api/auth/login
-    if (method === 'POST' && path === '/login') {
-      const { email, password } = JSON.parse(event.body);
+    // POST /api/auth/login or POST with action: 'login'
+    const isLoginRequest = (method === 'POST' && path === '/login') ||
+                          (method === 'POST' && requestBody.action === 'login');
+
+    if (isLoginRequest) {
+      const { email, password } = requestBody;
 
       // Validate input
       if (!email || !password) {
