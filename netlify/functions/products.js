@@ -110,15 +110,32 @@ exports.handler = async (event, context) => {
 
       try {
         decoded = jwt.verify(token, jwtSecret);
+        console.log('Decoded token:', decoded);
+
+        // Get user ID from token (could be 'id' or 'userId')
+        const userId = decoded.id || decoded.userId;
+        console.log('User ID from token:', userId);
+
+        if (!userId) {
+          console.error('No user ID in token');
+          return {
+            statusCode: 401,
+            headers,
+            body: JSON.stringify({ success: false, message: 'Invalid token structure' })
+          };
+        }
 
         // Verify user is admin
-        const { data: user } = await supabase
+        const { data: user, error: userError } = await supabase
           .from('users')
           .select('role')
-          .eq('id', decoded.id)
+          .eq('id', userId)
           .single();
 
-        if (!user || user.role !== 'admin') {
+        console.log('User from database:', user, 'Error:', userError);
+
+        if (userError || !user || user.role !== 'admin') {
+          console.log('Admin check failed - user:', user, 'role:', user?.role);
           return {
             statusCode: 403,
             headers,
@@ -126,10 +143,11 @@ exports.handler = async (event, context) => {
           };
         }
       } catch (error) {
+        console.error('Token verification error:', error.message);
         return {
           statusCode: 401,
           headers,
-          body: JSON.stringify({ success: false, message: 'Invalid token' })
+          body: JSON.stringify({ success: false, message: 'Invalid token: ' + error.message })
         };
       }
     }
