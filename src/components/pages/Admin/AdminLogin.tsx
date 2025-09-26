@@ -22,10 +22,13 @@ const AdminLogin: React.FC = () => {
     setError('');
 
     try {
-      const response = await fetch('/api/auth/login', {
+      const response = await fetch('/.netlify/functions/auth', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(credentials)
+        body: JSON.stringify({
+          action: 'login',
+          ...credentials
+        })
       });
 
       const data = await response.json();

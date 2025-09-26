@@ -41,6 +41,7 @@ exports.handler = async (event, context) => {
   const supabase = createClient(supabaseUrl, supabaseServiceKey);
   const method = event.httpMethod;
   const path = event.path.replace('/.netlify/functions/products', '');
+  console.log('Products API - Method:', method, 'Path:', path, 'Full path:', event.path);
 
   try {
     // Handle /api/products/meta/categories
@@ -153,12 +154,16 @@ exports.handler = async (event, context) => {
 
     // PATCH update product
     if (method === 'PATCH') {
-      const productId = path.split('/')[1];
+      // Get product ID from query params
+      const params = event.queryStringParameters || {};
+      const productId = params.id;
+      console.log('PATCH - productId:', productId, 'params:', params);
+
       if (!productId) {
         return {
           statusCode: 400,
           headers,
-          body: JSON.stringify({ success: false, message: 'Product ID required' })
+          body: JSON.stringify({ success: false, message: 'Product ID required. Use ?id=productId' })
         };
       }
 
@@ -181,12 +186,16 @@ exports.handler = async (event, context) => {
 
     // DELETE product
     if (method === 'DELETE') {
-      const productId = path.split('/')[1];
+      // Get product ID from query params
+      const params = event.queryStringParameters || {};
+      const productId = params.id;
+      console.log('DELETE - productId:', productId, 'params:', params);
+
       if (!productId) {
         return {
           statusCode: 400,
           headers,
-          body: JSON.stringify({ success: false, message: 'Product ID required' })
+          body: JSON.stringify({ success: false, message: 'Product ID required. Use ?id=productId' })
         };
       }
 

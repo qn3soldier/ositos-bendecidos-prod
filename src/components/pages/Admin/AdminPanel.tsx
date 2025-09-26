@@ -15,6 +15,7 @@ import GlassCard from '../../shared/GlassCard';
 import GradientButton from '../../shared/GradientButton';
 import { useAuth } from '../../../contexts/AuthContext';
 import { supabase } from '../../../services/supabase';
+import { tokenManager } from '../../../utils/tokenManager';
 
 interface Product {
   id: string;
@@ -52,7 +53,9 @@ const AdminPanel: React.FC = () => {
   const fetchProducts = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('accessToken');
+      const token = await tokenManager.getValidToken();
+      if (!token) return;
+
       const response = await fetch('/.netlify/functions/products', {
         headers: {
           'Authorization': `Bearer ${token}`
@@ -91,7 +94,8 @@ const AdminPanel: React.FC = () => {
     }
 
     try {
-      const token = localStorage.getItem('accessToken');
+      const token = await tokenManager.getValidToken();
+      if (!token) return;
       console.log('Adding product with data:', newProduct);
 
       const productData = {
@@ -135,10 +139,11 @@ const AdminPanel: React.FC = () => {
     if (!confirm('Are you sure you want to delete this product?')) return;
 
     try {
-      const token = localStorage.getItem('accessToken');
+      const token = await tokenManager.getValidToken();
+      if (!token) return;
       console.log('Deleting product:', productId, 'with token:', token ? 'present' : 'missing');
 
-      const response = await fetch(`/.netlify/functions/products/${productId}`, {
+      const response = await fetch(`/.netlify/functions/products?id=${productId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -178,7 +183,8 @@ const AdminPanel: React.FC = () => {
     if (!editingProduct || !newProduct.name || !newProduct.price) return;
 
     try {
-      const token = localStorage.getItem('accessToken');
+      const token = await tokenManager.getValidToken();
+      if (!token) return;
       console.log('Updating product:', editingProduct.id, 'with data:', newProduct);
 
       const updateData = {
@@ -190,7 +196,7 @@ const AdminPanel: React.FC = () => {
         image_url: newProduct.image_url || '/golden-bear.png'
       };
 
-      const response = await fetch(`/.netlify/functions/products/${editingProduct.id}`, {
+      const response = await fetch(`/.netlify/functions/products?id=${editingProduct.id}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
