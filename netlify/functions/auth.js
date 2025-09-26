@@ -74,7 +74,12 @@ exports.handler = async (event, context) => {
   const path = event.path.replace('/.netlify/functions/auth', '').replace('/api/auth', '');
   const method = event.httpMethod;
 
-  console.log('Auth endpoint called:', { path: event.path, cleanPath: path, method });
+  console.log('Auth endpoint called:', {
+    path: event.path,
+    cleanPath: path,
+    method,
+    body: event.body ? 'has body' : 'no body'
+  });
 
   try {
     const requestBody = event.body ? JSON.parse(event.body) : {};
@@ -156,7 +161,15 @@ exports.handler = async (event, context) => {
 
     // POST /api/auth/login or POST with action: 'login'
     const isLoginRequest = (method === 'POST' && path === '/login') ||
-                          (method === 'POST' && requestBody.action === 'login');
+                          (method === 'POST' && path === '' && requestBody.action === 'login') ||
+                          (method === 'POST' && path === '/' && requestBody.action === 'login');
+
+    console.log('Login check:', {
+      isLoginRequest,
+      path,
+      action: requestBody.action,
+      method
+    });
 
     if (isLoginRequest) {
       const { email, password } = requestBody;
